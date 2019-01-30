@@ -1,9 +1,9 @@
 
 
 function YappesCliProcessor() {
-	this.lookUpPath = {
+	this.apiPath = {
 		'login': function(){
-			return "/api/token/auth/cli";
+			return "/token/auth/cli";
 		}
 	};
 	this.resolvePath = "./commands/";
@@ -27,8 +27,8 @@ YappesCliProcessor.prototype.executeCommand = function(command, inputData, callb
 	let commandModule = self.loadCommand(command);
 	if(typeof commandModule == "function"){
 		
-		if(self.lookUpPath[command]){
-			inputData["endPointPath"] = self.lookUpPath[command]();
+		if(self.apiPath[command]){
+			inputData["endPointPath"] = self.apiPath[command]();
 		} else {
 			inputData["endPointPath"] = "not-required";
 		}
