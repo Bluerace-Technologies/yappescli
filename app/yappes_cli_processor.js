@@ -1,4 +1,5 @@
 
+
 function YappesCliProcessor() {
 	this.lookUpPath = {
 		'login': function(){
@@ -19,6 +20,7 @@ YappesCliProcessor.prototype.loadCommand = function(command){
 	}
 
 }
+
 
 YappesCliProcessor.prototype.executeCommand = function(command, inputData, callback){
 	let self = this;
