@@ -1,9 +1,10 @@
 exports.configs = function(){
 	return {
 		hostDetails:{
-			host:"cli-oauth.yappes.local", 
+			host:"localhost", 
 			port:3001,
-			scheme: "http"
+			scheme: "http",
+			basePath:"/api"
 		},
 		netrcPath: process.env.HOME + "/.netrc" 
 	}

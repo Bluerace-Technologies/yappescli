@@ -11,13 +11,10 @@ module.exports = function(processingData,callback){
 		emailId:processingData.username,
 		password:processingData.password
 	};
-	let endPointUri = configs().hostDetails.scheme+"://"+configs().hostDetails.host+":"+configs().hostDetails.port;
 
-	endPointUri+=processingData.endPointPath;
-
-	ypRequest.call(endPointUri,"post",data,function(err, apiResponse){
+	ypRequest.cliLogin(processingData.endPointPath,"post",data,function(err, apiResponse){
 		if(err){
-			callback(error);
+			callback(err);
 		} else {
 			netrcObj[configs().hostDetails.host] = {
 				login:processingData.username,
