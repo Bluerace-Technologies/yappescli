@@ -33,7 +33,7 @@ module.exports = function(processingData, callback) {
                 function() { return index < apiResponse.data.endpointDetails.length; },
                 function(callback) {
                     let cmd = commandOptions['create-dir'] + ' -p ';
-                    let path = 'ypworkspace/' + apiResponse.data.apiDetails.apiName + '/' + apiResponse.data.endpointDetails[index].endPointName
+                    let path = 'ypworkspace/' + apiResponse.data.apiDetails.apiName + '/endpoints'; 
                     cmd += path;
                     nodeCmd.get(cmd, function(err, data) {
                         if (err) {

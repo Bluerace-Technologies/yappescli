@@ -12,7 +12,6 @@ module.exports = function(processingData, callback){
 
     if(netrcObj.hasOwnProperty(configs().hostDetails.host)){
     	loginUser = netrcObj[configs().hostDetails.host].login;
-        console.log(netrcObj[configs().hostDetails.host]);
     	callback(null, loginUser);
     } else {
     	callback("You are not logged in. Please login using the command 'yappescli login'");
