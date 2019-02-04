@@ -15,7 +15,7 @@ exports.resolveOSCommands = function(){
 		commandOptions = {
 			'create-dir':'mkdir',
 			'delete-dir':'rmdir',
-			'create-file':'type null >',
+			'create-file':'type nul >',
 			'delete-file':'del'
 		};		
 	} else {

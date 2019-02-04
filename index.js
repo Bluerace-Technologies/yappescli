@@ -67,6 +67,40 @@ program
                 console.log(results);
             }
         });
+    });
+program
+    .command('clone')
+    .alias('cl')
+    .description('clone the api resources')
+    .action(function() {
+        let inputData = {
+            "code": 200,
+            "status": "OK",
+            "data": {
+                "apiDetails": {
+                    "apiName": "TravelLocal",
+                    "apiStatus": "unpublished"
+                },
+                "endpointDetails": [{
+                        "endPointName": "GetTripPlaces",
+                        "method": "GET",
+                        "businessLogic": "printf 'hello'"
+                    },
+                    {
+                        "endPointName": "PostTripPlaces",
+                        "method": "POST",
+                        "businessLogic": "how are you "
+                    }
+                ]
+            }
+        };
+        yappesCliObj.executeCommand('clone', inputData, function(err, results) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(results);
+            }
+        });
     });    
 
 program.parse(process.argv);
