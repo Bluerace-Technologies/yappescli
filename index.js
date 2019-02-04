@@ -67,6 +67,21 @@ program
                 console.log(results);
             }
         });
-    });    
-
+    });
+program
+    .alias('cl')
+    .description('clone the api resources')
+    .arguments('<clone> [apiIdentifier]')
+    .action(function(clone, apiIdentifier) {
+        let inputData = {
+            "apiIdentifier": apiIdentifier,
+        };
+        yappesCliObj.executeCommand('clone', inputData, function(err, results) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(results);
+            }
+        });
+    });
 program.parse(process.argv);
