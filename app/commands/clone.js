@@ -23,22 +23,25 @@ module.exports = function(processingData, callback) {
                 if (err) {
                     callback(err);
                 } else {
-                    callback(null, apiResponse);
+                    if (apiResponse.code == 200) {
+                        callback(null, apiResponse);
+                    } else {
+                        callback(apiResponse.data.message);
+                    }
                 }
             });
         },
         function(apiResponse, callback) {
             let index = 0;
-            async.whilst(
-                function() { return index < apiResponse.data.endpointDetails.length; },
-                function(callback) {
-                    let cmd = commandOptions['create-dir'] + ' -p ';
-                    let path = 'ypworkspace/' + apiResponse.data.apiDetails.apiName + '/endpoints'; 
-                    cmd += path;
-                    nodeCmd.get(cmd, function(err, data) {
-                        if (err) {
-                            callback(err);
-                        } else {
+            let cmd = commandOptions['create-dir'] + ' -p ';
+            let path = 'ypworkspace/' + apiResponse.data.apiDetails.apiName + '/endpoints';
+            cmd += path;
+            nodeCmd.get(cmd, function(err, data) {
+                if (err) {
+                    callback(err);
+                } else {
+                    async.whilst(function() { return index < apiResponse.data.endpointDetails.length; },
+                        function(callback) {
                             let touchCmd = commandOptions['create-file'] + " " + path + '/' + apiResponse.data.endpointDetails[index].endPointName + '.js';
                             nodeCmd.get(touchCmd, function(err, data) {
                                 if (err) {
@@ -55,19 +58,17 @@ module.exports = function(processingData, callback) {
                                     });
                                 }
                             });
-                        }
-                    });
-                },
-                function(err) {
-                    if (err) {
-                        callback(err);
-                    } else {
-                        callback(null, "Successfully Cloned the API " + processingData.apiIdentifier);
-                    }
+                        },
+                        function(err) {
+                            if (err) {
+                                callback(err);
+                            } else {
+                                callback(null, "Successfully Cloned the API " + processingData.apiIdentifier);
+                            }
+                        });
                 }
-            );
+            });
         },
-
     ], function(err, res) {
         if (err) {
             callback(err);
