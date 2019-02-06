@@ -69,14 +69,32 @@ program
         });
     });
 program
+    .command('clone')
     .alias('cl')
     .description('clone the api resources')
-    .arguments('<clone> [apiIdentifier]')
-    .action(function(clone, apiIdentifier) {
+    .arguments('<apiIdentifier>')
+    .action(function(apiIdentifier) {
         let inputData = {
             "apiIdentifier": apiIdentifier,
         };
         yappesCliObj.executeCommand('clone', inputData, function(err, results) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(results);
+            }
+        });
+    });
+program
+    .command('status')
+    .alias('st')
+    .description('status of the api endpoint')
+    .option('--apiName <apiName>', 'api name for status')
+    .action(function(options) {
+        let inputData = {
+            "apiName":options.apiName
+        };
+        yappesCliObj.executeCommand('status', inputData, function(err, results) {
             if (err) {
                 console.log(err);
             } else {
