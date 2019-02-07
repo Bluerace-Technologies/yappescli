@@ -93,7 +93,8 @@ module.exports = function(processingData, callback) {
             if (err.errno == -2) {
                 fs.readdir(configs().yappesWorkspace, (err, files) => {
                     if (err) {
-                        callback(err);
+                        let errMsg="'ypworkspace' does not exist ";
+                        callback(errMsg);
                     } else {
                         let errMsg = "The API Name you provided is incorrect. Please select from the list provided below\n " + files;
                         callback(null, errMsg);
