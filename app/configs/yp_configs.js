@@ -7,6 +7,6 @@ exports.configs = function(){
 			basePath:"/api"
 		},
 		netrcPath: process.env.HOME + "/.netrc",
-		yappesWorkspace:"ypworkspace/" 
+		yappesWorkspace:"ypworkspace/"
 	}
 }

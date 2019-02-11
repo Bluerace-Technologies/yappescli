@@ -6,6 +6,8 @@ var async = require('async');
 const netrc = require('netrc');
 const nodeCmd = require('node-cmd');
 let { normalize } = require('../utils/yp_normalize');
+let settingFileName = ".ypsettings.json";
+const { customErrorConfig } = require('../configs/yp_custom_error');
 
 module.exports = function(processingData, callback) {
     let commandOptions = resolveOSCommands();
@@ -20,7 +22,7 @@ module.exports = function(processingData, callback) {
     }
     async.waterfall([
         function(callback) {
-            if (fs.existsSync(configs().yappesWorkspace + ".ypsettings.conf")) {
+            if (fs.existsSync(configs().yappesWorkspace + settingFileName)) {
                 configFileExists = true;
                 callback(null);
             } else {
@@ -38,7 +40,11 @@ module.exports = function(processingData, callback) {
                         apiHashDetails = apiResponse.data;
                         callback(null, apiResponse);
                     } else {
-                        callback(apiResponse.data.message);
+                        if (apiResponse.message) {
+                            callback(apiResponse.message);
+                        } else {
+                            callback(apiResponse.data.message);
+                        }
                     }
                 }
             });
@@ -59,8 +65,7 @@ module.exports = function(processingData, callback) {
                                 if (err) {
                                     callback(err);
                                 } else {
-                                    let insertCmd = commandOptions['insert-into-file'] + " " + JSON.stringify(apiResponse.data.endpointDetails[index].businessLogic) + ' > ' + path + '/' + normalize(apiResponse.data.endpointDetails[index].endPointName) + '.js';
-                                    nodeCmd.get(insertCmd, function(err, data) {
+                                    fs.writeFile(path + '/' + normalize(apiResponse.data.endpointDetails[index].endPointName) + '.js',apiResponse.data.endpointDetails[index].businessLogic, function(err) {
                                         if (err) {
                                             callback(err);
                                         } else {
@@ -83,7 +88,7 @@ module.exports = function(processingData, callback) {
         },
         function(res, callback) {
             if (!configFileExists) {
-                createSettingsFile(apiHashDetails, function(err, res) {
+                createSettingsFile(apiHashDetails, function(err) {
                     if (err) {
                         callback(err);
                     } else {
@@ -91,7 +96,7 @@ module.exports = function(processingData, callback) {
                     }
                 });
             } else {
-                appendSettingsFile(apiHashDetails, function(err, res) {
+                appendSettingsFile(apiHashDetails, function(err) {
                     if (err) {
                         callback(err);
                     } else {
@@ -102,10 +107,13 @@ module.exports = function(processingData, callback) {
         }
     ], function(err, res) {
         if (err) {
+            error_code = 3000;
             if (err.errno == -2) {
-                callback("files not found or changed");
+                callback(customErrorConfig().customError.ELIBBAD);
+            } else if (err.code == 1) {
+                callback(customErrorConfig().customError.EACCES);
             } else {
-                callback(err);
+                callback(customErrorConfig().customError.EOPNOTSUPP);
             }
         } else {
             callback(null, res);
@@ -117,24 +125,31 @@ module.exports = function(processingData, callback) {
 function createSettingsFile(apiHashDetails, callback) {
     let path = configs().yappesWorkspace;
     let commandOptions = resolveOSCommands();
-    let touchCmd = commandOptions['create-file'] + " " + path + ".ypsettings.conf";
+    let touchCmd = commandOptions['create-file'] + " " + path + settingFileName;
     nodeCmd.get(touchCmd, function(err, data) {
         if (err) {
             callback(err);
         } else {
             let settingsData = {
-                "cloneReference": "",
-                "apiReferences": [{
-                    "<translated api_name>": "hashValue",
-                    "endpointReferences": [{ "<translated_endpoint_name>": "hashValue" }]
+                cloneReference: 'clr',
+                apiReferences: [{
+                    apiName: apiHashDetails.apiDetails.apiName,
+                    hash: apiHashDetails.apiDetails.hash,
+                    endPointReferences: []
                 }]
             };
-            let insertCmd = commandOptions['insert-into-file'] + " " + JSON.stringify(settingsData) + ' > ' + path + ".ypsettings.conf";
-            nodeCmd.get(insertCmd, function(err, data) {
+            for (var i = 0; i < apiHashDetails.endpointDetails.length; i++) {
+                let endPointTempVar = {
+                    endpointName: apiHashDetails.endpointDetails[i].endPointName,
+                    hash: apiHashDetails.endpointDetails[i].hash
+                };
+                settingsData.apiReferences[0].endPointReferences.push(endPointTempVar);
+            }
+            fs.writeFile(path + settingFileName, JSON.stringify(settingsData), function(err) {
                 if (err) {
                     callback(err);
                 } else {
-                    callback(null, data);
+                    callback(null);
                 }
             });
         }
@@ -142,32 +157,70 @@ function createSettingsFile(apiHashDetails, callback) {
 }
 
 function appendSettingsFile(apiHashDetails, callback) {
+    let path = configs().yappesWorkspace;
     async.waterfall([
         function(callback) {
-            let path = configs().yappesWorkspace;
             let commandOptions = resolveOSCommands();
-            fs.readFile(path + ".ypsettings.conf", 'utf8', function(err, data) {
+            fs.readFile(path + settingFileName, 'utf8', function(err, data) {
                 if (err) { callback(err); } else {
                     let content = JSON.stringify(data);
-                    data = JSON.parse(content);
+                    data = JSON.parse(JSON.parse(content));
                     callback(null, data);
                 }
             });
         },
         function(fileData, callback) {
-            //check the length of the corresponding apis endpoint 
-            //if changed then push to endpoint array
-            callback(null, fileData);
+            let epIndex = 0;
+            let newApiClone = false;
+            let settingsData = {
+                apiReferences: {
+                    apiName: apiHashDetails.apiDetails.apiName,
+                    hash: apiHashDetails.apiDetails.hash,
+                    endPointReferences: []
+                }
+            };
+            let apiCount = 0;
+            for (var i = 0; i < apiHashDetails.endpointDetails.length; i++) {
+                let endPointTempVar = {
+                    endpointName: apiHashDetails.endpointDetails[i].endPointName,
+                    hash: apiHashDetails.endpointDetails[i].hash
+                };
+                settingsData.apiReferences.endPointReferences.push(endPointTempVar);
+            }
+            async.whilst(function() {
+                return epIndex < fileData.apiReferences.length;
+            }, function(callback) {
+                if (apiHashDetails.apiDetails.hash == fileData.apiReferences[epIndex].hash) {
+                    fileData.apiReferences[epIndex] = settingsData.apiReferences;
+                } else {
+                    apiCount++;
+                }
+                if (apiCount == fileData.apiReferences.length) {
+                    newApiClone = true;
+                }
+                epIndex++;
+                callback(null);
+            }, function(err) {
+                if (err) { callback(err); } else {
+                    if (newApiClone) {
+                        fileData.apiReferences.push(settingsData.apiReferences);
+                    }
+                    callback(null, fileData);
+                }
+            });
         },
         function(fileData, callback) {
-            // push the details to the arr then overwrite
-            callback(null, fileData);
+            fs.writeFile(path + settingFileName, JSON.stringify(fileData), function(err) {
+                if (err) { callback(err) } else {
+                    callback(null);
+                }
+            });
         },
     ], function(err, result) {
         if (err) {
             callback(err);
         } else {
-            callback(null, result);
+            callback(null);
         }
     });
 }
