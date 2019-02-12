@@ -15,12 +15,36 @@ module.exports = function(processingData, callback) {
     let loginUser = "";
     let apiHashDetails = {};
     let configFileExists = false;
+    let workspace = "";
     if (netrcObj.hasOwnProperty(configs().hostDetails.host)) {
         loginUser = netrcObj[configs().hostDetails.host].login;
     } else {
         callback("You are not logged in. Please login using the command 'yappescli login'");
     }
     async.waterfall([
+        function(callback) {
+            if (fs.existsSync(process.env.HOME + '/.config/.yp_workspace_path.json')) {
+                let path=process.env.HOME + '/.config/.yp_workspace_path.json';
+                fetchWorkspacePath(path, function(err, workspacePathData) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        workspace = workspacePathData.path;
+                        console.log(workspace);
+                        callback(null);
+                    }
+                });
+            } else {
+                let path=process.env.HOME + '/.config/.yp_workspace_path.json';
+                createWsPath(path, function(err) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        callback(null);
+                    }
+                });
+            }
+        },
         function(callback) {
             if (fs.existsSync(configs().yappesWorkspace + settingFileName)) {
                 configFileExists = true;
@@ -65,7 +89,7 @@ module.exports = function(processingData, callback) {
                                 if (err) {
                                     callback(err);
                                 } else {
-                                    fs.writeFile(path + '/' + normalize(apiResponse.data.endpointDetails[index].endPointName) + '.js',apiResponse.data.endpointDetails[index].businessLogic, function(err) {
+                                    fs.writeFile(path + '/' + normalize(apiResponse.data.endpointDetails[index].endPointName) + '.js', apiResponse.data.endpointDetails[index].businessLogic, function(err) {
                                         if (err) {
                                             callback(err);
                                         } else {
@@ -220,6 +244,27 @@ function appendSettingsFile(apiHashDetails, callback) {
         if (err) {
             callback(err);
         } else {
+            callback(null);
+        }
+    });
+}
+
+function fetchWorkspacePath(path, callback) {
+    fs.readFile(path, 'utf8', function(err, data) {
+        if (err) { callback(err); } else {
+            let content = JSON.stringify(data);
+            data = JSON.parse(JSON.parse(content));
+            callback(null, data);
+        }
+    });
+}
+
+function createWsPath(path, callback) {
+    let workspacePath = {
+        "path": process.cwd() + 'ypworkspace/';
+    }
+    fs.writeFile(path, workspacePath, function(err) {
+        if (err) { callback(err) } else {
             callback(null);
         }
     });
