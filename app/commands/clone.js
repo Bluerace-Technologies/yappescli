@@ -15,6 +15,7 @@ module.exports = function(processingData, callback) {
     let loginUser = "";
     let apiHashDetails = {};
     let configFileExists = false;
+    let workspace = "";
     if (netrcObj.hasOwnProperty(configs().hostDetails.host)) {
         loginUser = netrcObj[configs().hostDetails.host].login;
     } else {
@@ -22,7 +23,30 @@ module.exports = function(processingData, callback) {
     }
     async.waterfall([
         function(callback) {
-            if (fs.existsSync(configs().yappesWorkspace + settingFileName)) {
+            if (fs.existsSync(process.env.HOME + '/.config/.yp_workspace_path.json')) {
+                let path = process.env.HOME + '/.config/.yp_workspace_path.json';
+                fetchWorkspacePath(path, function(err, workspacePathData) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        workspace = JSON.parse(workspacePathData).path;
+                        callback(null);
+                    }
+                });
+            } else {
+                let path = process.env.HOME + '/.config/.yp_workspace_path.json';
+                createWsPath(path, function(err,workspacePath) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        workspace=workspacePath;
+                        callback(null);
+                    }
+                });
+            }
+        },
+        function(callback) {
+            if (fs.existsSync(workspace + settingFileName)) {
                 configFileExists = true;
                 callback(null);
             } else {
@@ -52,7 +76,7 @@ module.exports = function(processingData, callback) {
         function(apiResponse, callback) {
             let index = 0;
             let cmd = commandOptions['create-dir'] + ' -p ';
-            let path = configs().yappesWorkspace + normalize(apiResponse.data.apiDetails.apiName) + '/endpoints';
+            let path = workspace + normalize(apiResponse.data.apiDetails.apiName) + '/endpoints';
             cmd += path;
             nodeCmd.get(cmd, function(err, data) {
                 if (err) {
@@ -65,7 +89,7 @@ module.exports = function(processingData, callback) {
                                 if (err) {
                                     callback(err);
                                 } else {
-                                    fs.writeFile(path + '/' + normalize(apiResponse.data.endpointDetails[index].endPointName) + '.js',apiResponse.data.endpointDetails[index].businessLogic, function(err) {
+                                    fs.writeFile(path + '/' + normalize(apiResponse.data.endpointDetails[index].endPointName) + '.js', apiResponse.data.endpointDetails[index].businessLogic, function(err) {
                                         if (err) {
                                             callback(err);
                                         } else {
@@ -88,7 +112,7 @@ module.exports = function(processingData, callback) {
         },
         function(res, callback) {
             if (!configFileExists) {
-                createSettingsFile(apiHashDetails, function(err) {
+                createSettingsFile(apiHashDetails, workspace, function(err) {
                     if (err) {
                         callback(err);
                     } else {
@@ -96,7 +120,7 @@ module.exports = function(processingData, callback) {
                     }
                 });
             } else {
-                appendSettingsFile(apiHashDetails, function(err) {
+                appendSettingsFile(apiHashDetails, workspace, function(err) {
                     if (err) {
                         callback(err);
                     } else {
@@ -122,8 +146,8 @@ module.exports = function(processingData, callback) {
     });
 }
 
-function createSettingsFile(apiHashDetails, callback) {
-    let path = configs().yappesWorkspace;
+function createSettingsFile(apiHashDetails, workspace, callback) {
+    let path = workspace;
     let commandOptions = resolveOSCommands();
     let touchCmd = commandOptions['create-file'] + " " + path + settingFileName;
     nodeCmd.get(touchCmd, function(err, data) {
@@ -156,8 +180,8 @@ function createSettingsFile(apiHashDetails, callback) {
     });
 }
 
-function appendSettingsFile(apiHashDetails, callback) {
-    let path = configs().yappesWorkspace;
+function appendSettingsFile(apiHashDetails, workspace, callback) {
+    let path = workspace;
     async.waterfall([
         function(callback) {
             let commandOptions = resolveOSCommands();
@@ -221,6 +245,25 @@ function appendSettingsFile(apiHashDetails, callback) {
             callback(err);
         } else {
             callback(null);
+        }
+    });
+}
+
+function fetchWorkspacePath(path, callback) {
+    fs.readFile(path, 'utf8', function(err, data) {
+        if (err) { callback(err); } else {
+            callback(null, data);
+        }
+    });
+}
+
+function createWsPath(path, callback) {
+    let workspacePath = {
+        "path": process.cwd() + '/ypworkspace/'
+    };
+    fs.writeFile(path, JSON.stringify(workspacePath), function(err) {
+        if (err) { callback(err) } else {
+            callback(null,workspacePath.path);
         }
     });
 }
