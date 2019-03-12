@@ -24,29 +24,29 @@ module.exports = function(processingData, callback) {
     async.waterfall([
         function(callback) {
             if (fs.existsSync(process.env.HOME + '/.config/.yp_workspace_path.json')) {
-                let path=process.env.HOME + '/.config/.yp_workspace_path.json';
+                let path = process.env.HOME + '/.config/.yp_workspace_path.json';
                 fetchWorkspacePath(path, function(err, workspacePathData) {
                     if (err) {
                         callback(err);
                     } else {
-                        workspace = workspacePathData.path;
-                        console.log(workspace);
+                        workspace = JSON.parse(workspacePathData).path;
                         callback(null);
                     }
                 });
             } else {
-                let path=process.env.HOME + '/.config/.yp_workspace_path.json';
-                createWsPath(path, function(err) {
+                let path = process.env.HOME + '/.config/.yp_workspace_path.json';
+                createWsPath(path, function(err,workspacePath) {
                     if (err) {
                         callback(err);
                     } else {
+                        workspace=workspacePath;
                         callback(null);
                     }
                 });
             }
         },
         function(callback) {
-            if (fs.existsSync(configs().yappesWorkspace + settingFileName)) {
+            if (fs.existsSync(workspace + settingFileName)) {
                 configFileExists = true;
                 callback(null);
             } else {
@@ -76,7 +76,7 @@ module.exports = function(processingData, callback) {
         function(apiResponse, callback) {
             let index = 0;
             let cmd = commandOptions['create-dir'] + ' -p ';
-            let path = configs().yappesWorkspace + normalize(apiResponse.data.apiDetails.apiName) + '/endpoints';
+            let path = workspace + normalize(apiResponse.data.apiDetails.apiName) + '/endpoints';
             cmd += path;
             nodeCmd.get(cmd, function(err, data) {
                 if (err) {
@@ -112,7 +112,7 @@ module.exports = function(processingData, callback) {
         },
         function(res, callback) {
             if (!configFileExists) {
-                createSettingsFile(apiHashDetails, function(err) {
+                createSettingsFile(apiHashDetails, workspace, function(err) {
                     if (err) {
                         callback(err);
                     } else {
@@ -120,7 +120,7 @@ module.exports = function(processingData, callback) {
                     }
                 });
             } else {
-                appendSettingsFile(apiHashDetails, function(err) {
+                appendSettingsFile(apiHashDetails, workspace, function(err) {
                     if (err) {
                         callback(err);
                     } else {
@@ -146,8 +146,8 @@ module.exports = function(processingData, callback) {
     });
 }
 
-function createSettingsFile(apiHashDetails, callback) {
-    let path = configs().yappesWorkspace;
+function createSettingsFile(apiHashDetails, workspace, callback) {
+    let path = workspace;
     let commandOptions = resolveOSCommands();
     let touchCmd = commandOptions['create-file'] + " " + path + settingFileName;
     nodeCmd.get(touchCmd, function(err, data) {
@@ -180,8 +180,8 @@ function createSettingsFile(apiHashDetails, callback) {
     });
 }
 
-function appendSettingsFile(apiHashDetails, callback) {
-    let path = configs().yappesWorkspace;
+function appendSettingsFile(apiHashDetails, workspace, callback) {
+    let path = workspace;
     async.waterfall([
         function(callback) {
             let commandOptions = resolveOSCommands();
@@ -252,8 +252,6 @@ function appendSettingsFile(apiHashDetails, callback) {
 function fetchWorkspacePath(path, callback) {
     fs.readFile(path, 'utf8', function(err, data) {
         if (err) { callback(err); } else {
-            let content = JSON.stringify(data);
-            data = JSON.parse(JSON.parse(content));
             callback(null, data);
         }
     });
@@ -261,11 +259,11 @@ function fetchWorkspacePath(path, callback) {
 
 function createWsPath(path, callback) {
     let workspacePath = {
-        "path": process.cwd() + 'ypworkspace/';
-    }
-    fs.writeFile(path, workspacePath, function(err) {
+        "path": process.cwd() + '/ypworkspace/'
+    };
+    fs.writeFile(path, JSON.stringify(workspacePath), function(err) {
         if (err) { callback(err) } else {
-            callback(null);
+            callback(null,workspacePath.path);
         }
     });
 }

@@ -6,7 +6,8 @@
   "preferGlobal": true,
   "bin": "./index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "mypostinstall":"node app/utils/create_workspace_path.js"
   },
   "repository": {
     "type": "git",
