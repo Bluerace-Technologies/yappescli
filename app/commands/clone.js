@@ -2,6 +2,7 @@ const fs = require('fs');
 const { configs } = require('../configs/yp_configs');
 let ypRequest = require('../utils/yp_request');
 let { resolveOSCommands } = require('../utils/yp_resolve_os');
+const isWsl = require('is-wsl');
 var async = require('async');
 const netrc = require('netrc');
 const nodeCmd = require('node-cmd');
@@ -23,8 +24,14 @@ module.exports = function(processingData, callback) {
     }
     async.waterfall([
         function(callback) {
-            if (fs.existsSync(process.env.HOME + '/.config/.yp_workspace_path.json')) {
-                let path = process.env.HOME + '/.config/.yp_workspace_path.json';
+            let path = "";
+            if (process.platform == "win32" || isWsl) {
+                path = process.env.HOME + '/AppData/Roaming/npm/yp_workspace_path.json';
+            } else {
+                path = process.env.HOME + '/.config/.yp_workspace_path.json';
+            }
+
+            if (fs.existsSync(path)) {
                 fetchWorkspacePath(path, function(err, workspacePathData) {
                     if (err) {
                         callback(err);
@@ -34,12 +41,11 @@ module.exports = function(processingData, callback) {
                     }
                 });
             } else {
-                let path = process.env.HOME + '/.config/.yp_workspace_path.json';
-                createWsPath(path, function(err,workspacePath) {
+                createWsPath(path, function(err, workspacePath) {
                     if (err) {
                         callback(err);
                     } else {
-                        workspace=workspacePath;
+                        workspace = workspacePath;
                         callback(null);
                     }
                 });
@@ -263,7 +269,7 @@ function createWsPath(path, callback) {
     };
     fs.writeFile(path, JSON.stringify(workspacePath), function(err) {
         if (err) { callback(err) } else {
-            callback(null,workspacePath.path);
+            callback(null, workspacePath.path);
         }
     });
 }
