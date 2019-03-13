@@ -1,5 +1,6 @@
 const fs = require('fs');
 const async = require('async');
+const isWsl = require('is-wsl');
 const netrc = require('netrc');
 const nodeCmd = require('node-cmd');
 
@@ -74,7 +75,7 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
           yappesUrls: apiHashDetails.apiDetails.urls,
           remoteEndpoints: apiHashDetails.apiDetails.remoteEndpoints,
           endPointReferences: [],
-        },
+        }
       };
       let apiCount = 0;
       for (let i = 0; i < apiHashDetails.endpointDetails.length; i++) {
@@ -139,7 +140,7 @@ function createWsPath(path, callback) {
   const workspacePath = {
     path: `${process.cwd()}/ypworkspace/`,
   };
-  const configPath = `${process.env.HOME}/.config/yappes`;
+  const configPath = `${process.env.HOME}/${configs.configBase}`;
   const cmd = `${commandOptions['create-dir']} -p ${configPath}`;
   nodeCmd.get(cmd, (err, data) => {
     if (err) {
@@ -251,7 +252,7 @@ module.exports = function (processingData, callback) {
       configs().getConfigSettings((err, data) => {
         if (err) {
           if (err.errno == -2) {
-            const path = `${process.env.HOME}/.config/yappes/settings.json`;
+            const path = `${process.env.HOME}/${configs.configBase}/settings.json`;
             createWsPath(path, (err, workspacePath) => {
               if (err) {
                 callback(err);
