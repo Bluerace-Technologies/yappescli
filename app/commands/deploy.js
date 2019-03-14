@@ -10,6 +10,7 @@ const { customErrorConfig } = require('../configs/yp_custom_error');
 
 
 module.exports = function(processingData, callback) {
+    let apiNameError = 'API Name is Invalid';
     let updateBusinessLogicData = {
         "endpointReference": "",
         "businessLogic": ""
@@ -59,7 +60,7 @@ module.exports = function(processingData, callback) {
                             }
                         }
                         if (errorCondition) {
-                            callback("api name is invalid");
+                            callback(apiNameError);
                         } else {
                             callback(null, updateBusinessLogicData);
                         }
