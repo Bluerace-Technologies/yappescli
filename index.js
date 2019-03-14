@@ -102,4 +102,23 @@ program
             }
         });
     });
+program
+    .command('deploy')
+    .alias('dp')
+    .description('Apiname and the Endpoint name for deploy')
+    .option('-a, --apiname <apiname>','API Name to enter')
+    .option('-e, --endpointname <endpointname>','Endpoint Name to enter')
+    .action(function(options) { 
+        let inputData = {
+            "apiName":options.apiname,
+            "endPointName":options.endpointname
+        };
+        yappesCliObj.executeCommand('deploy', inputData, function(err, results) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(results);
+            }
+        });
+    });    
 program.parse(process.argv);

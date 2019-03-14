@@ -12,6 +12,10 @@ exports.customErrorConfig = function() {
             'EOPNOTSUPP': {
                 errorCode: 3095,
                 errorMessage: "Operation not supported"
+            },
+            'ENOENT': {
+                errorCode: 3002,
+                errorMessage: "Current Path does not Exists.Kindly Check your API Name"
             }
         }
     }
