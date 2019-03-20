@@ -2,16 +2,47 @@ const fs = require('fs');
 const netrc = require('netrc');
 const { configs } = require('../configs/yp_configs');
 let { resolveOSCommands } = require('../utils/yp_resolve_os');
+let { normalize, denormalize } = require('../utils/yp_normalize');
 let ypRequest = require('../utils/yp_request');
 const util = require('util');
 const async = require('async');
 
 module.exports = function(processingData, callback) {
     let apiDetails = { "apiName": processingData.apiName, "endpointDetails": [] };
-    let path = configs().yappesWorkspace + processingData.apiName + "/endpoints/";
+    let path = "";
+    let workspacePath = "";
+    let workspaceFileJson = {};
     async.waterfall([
         function(callback) {
-            fs.readdir(path, (err, files) => {
+            configs().getConfigSettings(function(err, data) {
+                if (err) {
+                    callback(err);
+                } else {
+                    workspacePath = JSON.parse(data).path
+                    path = workspacePath + normalize(processingData.apiName) + "/endpoints/";
+                    callback(null);
+                }
+            });
+        },
+        function(callback) {
+            fs.readFile(workspacePath+"/.ypsettings.json", 'utf8', function(err, data) {
+                if (err) {
+                    error_code = 3000;
+                    if (err.errno == -2) {
+                        callback(customErrorConfig().customError.ENOENT);
+                    } else if (err.code == 1) {
+                        callback(customErrorConfig().customError.EACCES);
+                    } else {
+                        callback(customErrorConfig().customError.EOPNOTSUPP);
+                    }
+                } else {
+                    workspaceFileJson = JSON.parse(data);
+                    callback(null)
+                }
+            });
+        },
+        function(callback) {
+            fs.readdir(path, function(err, files) {
                 if (err) {
                     callback(err);
                 } else {
@@ -30,6 +61,21 @@ module.exports = function(processingData, callback) {
                             callback(err);
                         } else {
                             var mtime = new Date(util.inspect(stats.mtime));
+                            let apiNameIndex = 0;
+                            for (apiNameIndex = 0; apiNameIndex < workspaceFileJson.apiReferences.length; apiNameIndex++) {
+                                endpointIndex = 0;
+                                if (workspaceFileJson.apiReferences[apiNameIndex].apiName == processingData.apiName) {
+                                    for (apiNameIndex = 0; apiNameIndex < workspaceFileJson.apiReferences.length; apiNameIndex++) {
+                                        if (workspaceFileJson.apiReferences[apiNameIndex].endPointReferences[endpointIndex].endpointName == processingData.endPointName) {
+                                            updateBusinessLogicData.endpointReference = workspaceFileJson.apiReferences[apiNameIndex].endPointReferences[endpointIndex].hash;
+                                        }
+                                        errorCondition = false;
+                                    }
+                                    break;
+                                } else {
+                                    errorCondition = true;
+                                }
+                            }                        
                             let resourceDetails = { "endpointName": listFile[fileNumber], "lastModifiedDateTime": mtime };
                             apiDetails.endpointDetails.push(resourceDetails);
                             fileNumber++;
@@ -39,7 +85,6 @@ module.exports = function(processingData, callback) {
                 },
                 function(err) {
                     if (err) {
-
                         callback(err);
                     } else {
                         callback(null, apiDetails);
@@ -68,10 +113,10 @@ module.exports = function(processingData, callback) {
                     return epIndex < statusResponse.data.length;
                 }, function(callback) {
                     if (statusResponse.data[epIndex].remoteSync == 'Yes') {
-                        syncResponse += statusResponse.data[epIndex].endpointName + " Remote code is ahead of your local machine.Use the command 'yappescli pull' to sync with your local code. \n";
+                        syncResponse += "'"+ statusResponse.data[epIndex].endpointName + "'" + " Remote code is ahead of your local machine.Use the command 'yappescli pull' to sync with your local code. \n";
                         epIndex++;
                     } else if (statusResponse.data[epIndex].remoteSync == 'No') {
-                        syncResponse += statusResponse.data[epIndex].endpointName + " Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n";
+                        syncResponse += "'"+ statusResponse.data[epIndex].endpointName + "'" + " Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n";
                         epIndex++;
                     } else {
                         syncResponse += statusResponse.data[epIndex].endpointName;
@@ -91,12 +136,13 @@ module.exports = function(processingData, callback) {
     ], function(err, res) {
         if (err) {
             if (err.errno == -2) {
-                fs.readdir(configs().yappesWorkspace, (err, files) => {
+                fs.readdir(workspacePath, function(err, files) {
+                    let fileList = denormalize(files, workspaceFileJson);
                     if (err) {
-                        let errMsg="'ypworkspace' does not exist ";
+                        let errMsg = "'ypworkspace' does not exist ";
                         callback(errMsg);
                     } else {
-                        let errMsg = "The API Name you provided is incorrect. Please select from the list provided below\n " + files;
+                        let errMsg = "The API Name you provided is incorrect. Please select from the list provided below\n " + JSON.stringify(fileList);
                         callback(null, errMsg);
                     }
                 });

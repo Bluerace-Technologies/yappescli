@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/Bluerace-Technologies/yappescli#readme",
   "dependencies": {
+    "async": "^2.6.2",
     "commander": "^2.19.0",
     "dotenv": "^6.2.0",
     "inquirer": "^6.2.1",
