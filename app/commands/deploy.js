@@ -15,13 +15,25 @@ module.exports = function(processingData, callback) {
         "endpointReference": "",
         "businessLogic": ""
     }
-    let pathEndPoint = configs().yappesWorkspace + normalize(processingData.apiName) + "/endpoints/";
-    let pathYpSetting = configs().yappesWorkspace + '.ypsettings.json';
-    businesslogicFile = pathEndPoint + processingData.endPointName + ".js";
+    let pathEndPoint = "";
+    let pathYpSetting = "";
     let ypSettings = "";
+    let businesslogicFile= "";
     async.waterfall([
             function(callback) {
-                fs.readFile(businesslogicFile, 'utf8', (err, data) => {
+                configs().getConfigSettings(function(err, data){
+                    if(err){
+                       callback(err);
+                    } else {
+                        pathEndPoint = JSON.parse(data).path + normalize(processingData.apiName) + "/endpoints/";
+                        pathYpSetting = JSON.parse(data).path + '.ypsettings.json';
+                        businesslogicFile = pathEndPoint + normalize(processingData.endPointName) + ".js";
+                        callback(null);
+                    }
+                });                    
+            },
+            function(callback) {
+                fs.readFile(businesslogicFile, 'utf8', function(err, data){
                     if (err) {
                         error_code = 3000;
                         if (err.errno == -2) {
@@ -45,7 +57,7 @@ module.exports = function(processingData, callback) {
                         callback(err);
                     } else {
                         ypSettings = JSON.parse(data);
-                        var apiNameIndex = 0;
+                        let apiNameIndex = 0;
                         for (apiNameIndex = 0; apiNameIndex < ypSettings.apiReferences.length; apiNameIndex++) {
                             endpointIndex = 0;
                             if (ypSettings.apiReferences[apiNameIndex].apiName == processingData.apiName) {
@@ -54,7 +66,8 @@ module.exports = function(processingData, callback) {
                                         updateBusinessLogicData.endpointReference = ypSettings.apiReferences[apiNameIndex].endPointReferences[endpointIndex].hash;
                                     }
                                     errorCondition = false;
-                                }break;
+                                }
+                                break;
                             } else {
                                 errorCondition = true;
                             }

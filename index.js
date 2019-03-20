@@ -71,11 +71,11 @@ program
 program
     .command('clone')
     .alias('cl')
-    .description('clone the api resources')
-    .arguments('<apiIdentifier>')
+    .description('Clone the API resources')
+    .arguments('-a, --apiname <apiIdentifier>')
     .action(function(apiIdentifier) {
         let inputData = {
-            "apiIdentifier": apiIdentifier,
+            "apiIdentifier": apiname,
         };
         yappesCliObj.executeCommand('clone', inputData, function(err, results) {
             if (err) {
@@ -88,11 +88,11 @@ program
 program
     .command('status')
     .alias('st')
-    .description('status of the api endpoint')
-    .option('--apiName <apiName>', 'api name for status')
+    .description('Status of the API endpoint')
+    .option('-a, --apiname <apiName>', 'API name for status')
     .action(function(options) {
         let inputData = {
-            "apiName":options.apiName
+            "apiName":options.apiname
         };
         yappesCliObj.executeCommand('status', inputData, function(err, results) {
             if (err) {
@@ -105,7 +105,7 @@ program
 program
     .command('deploy')
     .alias('dp')
-    .description('Apiname and the Endpoint name for deploy')
+    .description('Deploying the business logic changes to the remote')
     .option('-a, --apiname <apiname>','API Name to enter')
     .option('-e, --endpointname <endpointname>','Endpoint Name to enter')
     .action(function(options) { 

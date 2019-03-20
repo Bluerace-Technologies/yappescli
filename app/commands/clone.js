@@ -23,27 +23,26 @@ module.exports = function(processingData, callback) {
     }
     async.waterfall([
         function(callback) {
-            if (fs.existsSync(process.env.HOME + '/.config/.yp_workspace_path.json')) {
-                let path = process.env.HOME + '/.config/.yp_workspace_path.json';
-                fetchWorkspacePath(path, function(err, workspacePathData) {
-                    if (err) {
-                        callback(err);
+            configs().getConfigSettings(function(err, data){
+                if(err){
+                   if(err.errno==-2){
+                        let path = process.env.HOME + '/.config/yappes/settings.json';
+                        createWsPath(path, function(err,workspacePath) {
+                            if (err) {
+                                callback(err);
+                            } else {
+                                workspace=workspacePath;
+                                callback(null);
+                            }
+                        });                       
                     } else {
-                        workspace = JSON.parse(workspacePathData).path;
-                        callback(null);
-                    }
-                });
-            } else {
-                let path = process.env.HOME + '/.config/.yp_workspace_path.json';
-                createWsPath(path, function(err,workspacePath) {
-                    if (err) {
                         callback(err);
-                    } else {
-                        workspace=workspacePath;
-                        callback(null);
                     }
-                });
-            }
+                } else {
+                    workspace = JSON.parse(data).path; 
+                    callback(null);
+                }
+            });             
         },
         function(callback) {
             if (fs.existsSync(workspace + settingFileName)) {
@@ -258,12 +257,24 @@ function fetchWorkspacePath(path, callback) {
 }
 
 function createWsPath(path, callback) {
+    let commandOptions = resolveOSCommands();
     let workspacePath = {
         "path": process.cwd() + '/ypworkspace/'
     };
-    fs.writeFile(path, JSON.stringify(workspacePath), function(err) {
-        if (err) { callback(err) } else {
-            callback(null,workspacePath.path);
+    let configPath = process.env.HOME+"/.config/yappes";
+    let cmd = commandOptions['create-dir']+" -p "+configPath;
+    nodeCmd.get(cmd,function(err,data){
+        if(err){
+            callback(err);
+        } else {
+            fs.writeFile(path, JSON.stringify(workspacePath), function(err) {
+                if(err){ 
+                    callback(err) 
+                } else {
+                    callback(null,workspacePath.path);
+                }
+            });            
         }
     });
+
 }
