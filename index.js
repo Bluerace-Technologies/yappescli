@@ -72,10 +72,10 @@ program
     .command('clone')
     .alias('cl')
     .description('Clone the API resources')
-    .arguments('-a, --apiname <apiIdentifier>')
-    .action(function(apiIdentifier) {
+    .option('-a, --apiname <apiIdentifier>', 'API name for cloning')
+    .action(function(options) {
         let inputData = {
-            "apiIdentifier": apiname,
+            "apiIdentifier": options.apiname,
         };
         yappesCliObj.executeCommand('clone', inputData, function(err, results) {
             if (err) {
