@@ -53,35 +53,29 @@ module.exports = function(processingData, callback) {
         function(listFile, callback) {
             let fileNumber = 0;
             async.whilst(function() {
-                    return fileNumber < listFile.length;
-                },
-                function(callback) {
-                    fs.stat(path + listFile[fileNumber], function(err, stats) {
-                        if (err) {
-                            callback(err);
-                        } else {
-                            var mtime = new Date(util.inspect(stats.mtime));
-                            let apiNameIndex = 0;
-                            for (apiNameIndex = 0; apiNameIndex < workspaceFileJson.apiReferences.length; apiNameIndex++) {
-                                endpointIndex = 0;
-                                if (workspaceFileJson.apiReferences[apiNameIndex].apiName == processingData.apiName) {
-                                    for (apiNameIndex = 0; apiNameIndex < workspaceFileJson.apiReferences.length; apiNameIndex++) {
-                                        if (workspaceFileJson.apiReferences[apiNameIndex].endPointReferences[endpointIndex].endpointName == processingData.endPointName) {
-                                            updateBusinessLogicData.endpointReference = workspaceFileJson.apiReferences[apiNameIndex].endPointReferences[endpointIndex].hash;
+                        return fileNumber < listFile.length;
+                    },
+                    function(callback) {
+                        fs.stat(path + listFile[fileNumber], function(err, stats) {
+                            if (err) {
+                                callback(err);
+                            } else {
+                                var mtime = new Date(util.inspect(stats.mtime));
+                                let hashArr = [];
+                                for (let apiNameIndex = 0; apiNameIndex < workspaceFileJson.apiReferences.length; apiNameIndex++) {
+                                    if (workspaceFileJson.apiReferences[apiNameIndex].apiName==processingData.apiName) {
+                                        for (let epIndex = 0; epIndex < workspaceFileJson.apiReferences[apiNameIndex].endPointReferences.length; epIndex++) {
+                                        hashArr.push(workspaceFileJson.apiReferences[apiNameIndex].endPointReferences[epIndex].hash);
                                         }
-                                        errorCondition = false;
                                     }
-                                    break;
-                                } else {
-                                    errorCondition = true;
                                 }
-                            }                        
-                            let resourceDetails = { "endpointName": listFile[fileNumber], "lastModifiedDateTime": mtime };
-                            apiDetails.endpointDetails.push(resourceDetails);
-                            fileNumber++;
-                            callback(null);
-                        }
-                    });
+                                hashArr=hashArr.reverse();
+                                let resourceDetails = { "endpointName": listFile[fileNumber], "lastModifiedDateTime": mtime ,"hash":hashArr[fileNumber]};
+                                apiDetails.endpointDetails.push(resourceDetails);
+                                fileNumber++;
+                                callback(null);
+                            }
+                        });
                 },
                 function(err) {
                     if (err) {
@@ -112,10 +106,10 @@ module.exports = function(processingData, callback) {
                 async.whilst(function() {
                     return epIndex < statusResponse.data.length;
                 }, function(callback) {
-                    if (statusResponse.data[epIndex].remoteSync == 'Yes') {
+                    if (statusResponse.data[epIndex].remoteSync == 'yes') {
                         syncResponse += "'"+ statusResponse.data[epIndex].endpointName + "'" + " Remote code is ahead of your local machine.Use the command 'yappescli pull' to sync with your local code. \n";
                         epIndex++;
-                    } else if (statusResponse.data[epIndex].remoteSync == 'No') {
+                    } else if (statusResponse.data[epIndex].remoteSync == 'no') {
                         syncResponse += "'"+ statusResponse.data[epIndex].endpointName + "'" + " Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n";
                         epIndex++;
                     } else {
