@@ -16,8 +16,9 @@ module.exports = function(processingData, callback) {
     let apiHashDetails = {};
     let configFileExists = false;
     let workspace = "";
-    if (netrcObj.hasOwnProperty(configs().hostDetails.host)) {
-        loginUser = netrcObj[configs().hostDetails.host].login;
+    let hostObj=configs().getHostDetails();
+    if (netrcObj.hasOwnProperty(hostObj.host)) {
+        loginUser = netrcObj[hostObj.host].login;
     } else {
         callback("You are not logged in. Please login using the command 'yappescli login'");
     }
@@ -92,6 +93,7 @@ module.exports = function(processingData, callback) {
                                         if (err) {
                                             callback(err);
                                         } else {
+                                            fs.utimesSync(path + '/' + normalize(apiResponse.data.endpointDetails[index].endPointName) + '.js', new Date(apiResponse.data.endpointDetails[index].modifiedDateTime), new Date(apiResponse.data.endpointDetails[index].modifiedDateTime));
                                             index++;
                                             callback(null);
                                         }

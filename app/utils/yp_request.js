@@ -6,7 +6,8 @@ exports.call = function(endPointPath, operation, data, callback) {
     let self = this;
     let reqOptions = {};
     let netrcObj = netrc();
-    let endPointUri = configs().hostDetails.scheme+"://"+configs().hostDetails.host+":"+configs().hostDetails.port+configs().hostDetails.basePath;
+    let hostObj=configs().getHostDetails();
+    let endPointUri = hostObj.scheme+"://"+hostObj.host+":"+hostObj.port+hostObj.basePath;
     endPointUri += endPointPath;
 
     reqOptions = {
@@ -16,8 +17,8 @@ exports.call = function(endPointPath, operation, data, callback) {
      headers: {}
     };    
 
-    if(netrcObj.hasOwnProperty(configs().hostDetails.host)){
-            reqOptions['headers']['X-YPCLI-TOKEN'] = netrcObj[configs().hostDetails.host].password;
+    if(netrcObj.hasOwnProperty(hostObj.host)){
+            reqOptions['headers']['X-YPCLI-TOKEN'] = netrcObj[hostObj.host].password;
     } else {
             return callback("You are not logged in. Please login using the command 'yappescli login'");
     } 
@@ -90,7 +91,8 @@ exports.call = function(endPointPath, operation, data, callback) {
 exports.cliLogin = function(endPointPath, operation, data, callback) {
     let self = this;
     let reqOptions = {};
-    let endPointUri = configs().hostDetails.scheme+"://"+configs().hostDetails.host+":"+configs().hostDetails.port+configs().hostDetails.basePath;
+    let hostObj=configs().getHostDetails();
+    let endPointUri = hostObj.scheme+"://"+hostObj.host+":"+hostObj.port+hostObj.basePath;
     endPointUri += endPointPath;
 
     if (operation == "post") {
