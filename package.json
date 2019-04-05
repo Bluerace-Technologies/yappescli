@@ -7,7 +7,7 @@
   "bin": "./index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "mypostinstall":"node app/utils/create_workspace_path.js"
+    "mypostinstall": "node app/utils/create_workspace_path.js"
   },
   "repository": {
     "type": "git",
@@ -32,7 +32,9 @@
     "node-cmd": "^3.0.0",
     "opn": "^5.4.0",
     "path": "^0.12.7",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^3.8.0"
   },
   "devDependencies": {
     "cross-env": "^5.2.0"

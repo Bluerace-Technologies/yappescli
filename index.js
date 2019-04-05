@@ -5,47 +5,45 @@ const yappesCli = require('./app/yappes_cli_processor');
 
 let yappesCliObj = new yappesCli();
 
-
-let loginQuestion = [
-	{
-		type: 'input',
-		name: 'username',
-		message: 'Enter your email address'
-	},
-	{
-		type: 'input',
-		name: 'password',
-		message: 'Enter your password'
-	}
+let loginQuestion = [{
+        type: 'input',
+        name: 'username',
+        message: 'Enter your email address'
+    },
+    {
+        type: 'input',
+        name: 'password',
+        message: 'Enter your password'
+    }
 ];
 
 program
-	.version('0.0.1')
-	.description('Yappes CLI');
+    .version('0.0.1')
+    .description('Yappes CLI');
 
 program
-	.command('login')
-	.alias('l')
-	.description('Login to Yappes')
-	.action(function(cmd) {
-		inquirer.prompt(loginQuestion).then(function(answers){
-				yappesCliObj.executeCommand('login',answers, function(err, results){
-					if(err){
-						console.log(err);
-					} else {
-						console.log(results);
-					}
-				});
-		});
-	});
+    .command('login')
+    .alias('l')
+    .description('Login to Yappes')
+    .action(function(cmd) {
+        inquirer.prompt(loginQuestion).then(function(answers) {
+            yappesCliObj.executeCommand('login', answers, function(err, results) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log(results);
+                }
+            });
+        });
+    });
 
 program
     .command('whoami')
     .alias('wh')
     .description('Logged in User details')
     .action(function() {
-    	let inputData = {};
-        yappesCliObj.executeCommand('whoami',inputData, function(err, results) {
+        let inputData = {};
+        yappesCliObj.executeCommand('whoami', inputData, function(err, results) {
             if (err) {
                 console.log(err);
             } else {
@@ -59,8 +57,8 @@ program
     .alias('lg')
     .description('Log out the current yappes user')
     .action(function() {
-    	let inputData = {};
-        yappesCliObj.executeCommand('logout',inputData,function(err, results) {
+        let inputData = {};
+        yappesCliObj.executeCommand('logout', inputData, function(err, results) {
             if (err) {
                 console.log(err);
             } else {
@@ -92,7 +90,7 @@ program
     .option('-a, --apiname <apiName>', 'API name for status')
     .action(function(options) {
         let inputData = {
-            "apiName":options.apiname
+            "apiName": options.apiname
         };
         yappesCliObj.executeCommand('status', inputData, function(err, results) {
             if (err) {
@@ -106,12 +104,12 @@ program
     .command('deploy')
     .alias('dp')
     .description('Deploying the business logic changes to the remote')
-    .option('-a, --apiname <apiname>','API Name to enter')
-    .option('-e, --endpointname <endpointname>','Endpoint Name to enter')
-    .action(function(options) { 
+    .option('-a, --apiname <apiname>', 'API Name to enter')
+    .option('-e, --endpointname <endpointname>', 'Endpoint Name to enter')
+    .action(function(options) {
         let inputData = {
-            "apiName":options.apiname,
-            "endPointName":options.endpointname
+            "apiName": options.apiname,
+            "endPointName": options.endpointname
         };
         yappesCliObj.executeCommand('deploy', inputData, function(err, results) {
             if (err) {
@@ -120,5 +118,9 @@ program
                 console.log(results);
             }
         });
-    });    
+    });
+program.on('command:*', function () {
+  console.error('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
+  program.help();
+});
 program.parse(process.argv);

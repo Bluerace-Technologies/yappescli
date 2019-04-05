@@ -137,7 +137,7 @@ module.exports = function(processingData, callback) {
                         callback(errMsg);
                     } else {
                         let errMsg = "The API Name you provided is incorrect. Please select from the list provided below\n " + JSON.stringify(fileList);
-                        callback(null, errMsg);
+                        callback(errMsg);
                     }
                 });
             } else {

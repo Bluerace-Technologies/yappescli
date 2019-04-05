@@ -6,6 +6,7 @@ let {resolveOSCommands} = require('../utils/yp_resolve_os');
 
 module.exports = function(processingData,callback){
 	let fpath = configs().netrcPath;
+	let hostObj=configs().getHostDetails();
 	let netrcObj = netrc();
 	let data ={
 		emailId:processingData.username,
@@ -16,7 +17,7 @@ module.exports = function(processingData,callback){
 		if(err){
 			callback(err);
 		} else {
-			netrcObj[configs().hostDetails.host] = {
+			netrcObj[hostObj.host] = {
 				login:processingData.username,
 				password:apiResponse.data.ypToken
 			};
