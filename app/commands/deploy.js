@@ -89,7 +89,7 @@ module.exports = function(processingData, callback) {
                         } else {
                             callback(null, updateBusinessLogicData);
                         }
-                    } //updateBusinessLogicData.endpointReference = ypSettings.apiReferences[apiNameIndex].endPointReferences[endpointIndex].hash;
+                    }
                 });
             },
             function(updateBusinessLogicData, callback) {
