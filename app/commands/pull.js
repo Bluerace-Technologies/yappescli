@@ -7,6 +7,7 @@ let { normalize } = require('../utils/yp_normalize');
 const util = require('util');
 const async = require('async');
 const { customErrorConfig } = require('../configs/yp_custom_error');
+const ora = require('ora');
 let pathEndPoint = "";
 let pathYpSetting = "";
 let ypSettings = "";
@@ -165,32 +166,32 @@ module.exports = function(processingData, callback) {
                 });
             },
             function(callback) {
-                if (processingData.endPointName == undefined) {
+                if (true) {
                     let epIndex = 0;
                     let syncResponse = "";
-                    if (responseDataPull.data.length) {
+                    if (responseDataPull.data.endpointPullList.length >= 1) {
                         async.whilst(function() {
-                            return epIndex < responseDataPull.data.length;
+                            return epIndex < responseDataPull.data.endpointPullList.length;
                         }, function(callback) {
-                            if (responseDataPull.data[epIndex].remoteSync == 'yes') {
-                                syncResponse += "'" + responseDataPull.data[epIndex].endpointName + "'" + " Remote code is not latest We pulling and saving code for you. \n";
-                                path = pathEndPoint + normalize(responseDataPull.data[epIndex].endpointName) + '.js';
-                                writeFile(path, decodeURI(responseDataPull.data[epIndex].businesslogic), new Date(responseDataPull.data[epIndex].remoteModifiedDateTime), function(err) {
+                            if (responseDataPull.data.endpointPullList[epIndex].remoteSync == 'yes') {
+                                syncResponse += "'" + responseDataPull.data.endpointPullList[epIndex].endpointName + "'" + " Remote code was ahead of your Local code repo. Syncing is done. Now both the Local and Remote repo are in-sync.\n";
+                                path = pathEndPoint + normalize(responseDataPull.data.endpointPullList[epIndex].endpointName) + '.js';
+                                writeFile(path, decodeURI(responseDataPull.data.endpointPullList[epIndex].businesslogic), new Date(responseDataPull.data.endpointPullList[epIndex].remoteModifiedDateTime), function(err) {
                                     if (err) {
                                         callback(err);
                                     } else {
                                         epIndex++;
-                                        callback(null, 'Success !!');
+                                        callback(null);
                                     }
                                 });
-                            } else if (responseDataPull.data[epIndex].remoteSync == 'no') {
-                                syncResponse += "'" + responseDataPull.data[epIndex].endpointName + "'" + " Local having the latest Code. You Don't need to pull from Remote. \n";
+                            } else if (responseDataPull.data.endpointPullList[epIndex].remoteSync == 'no') {
+                                syncResponse += "'" + responseDataPull.data.endpointPullList[epIndex].endpointName + "'" + " Local is having the latest Code. Once you have done with your update use 'yappescli deploy' command to push it to Remote.\n";
                                 epIndex++;
                                 callback(null);
-                            } else if (responseDataPull.data[epIndex].remoteSync == 'in-sync') {
-                                syncResponse += "'" + responseDataPull.data[epIndex].endpointName + "'" + " Local And Remote are already in-sync. So, You Don't need to pull from Remote. \n";
+                            } else if (responseDataPull.data.endpointPullList[epIndex].remoteSync == 'in-sync') {
+                                syncResponse += "'" + responseDataPull.data.endpointPullList[epIndex].endpointName + "'" + " Local and Remote are already in-sync. \n";
                                 epIndex++;
-                                callback(null, 'Alredy in-sync');
+                                callback(null,);
                             }
                         }, function(err) {
                             if (err) {
@@ -199,16 +200,17 @@ module.exports = function(processingData, callback) {
                                 callback(null, syncResponse);
                             }
                         });
-                    } else { callback(responseDataPull); }
+                    }
+
                 } else {
-                    if (responseDataPull.data[0].remoteSync == 'no' || responseDataPull.data[0].remoteSync == 'in-sync') {
+                    if (responseDataPull.data.endpointPullList[0].remoteSync == 'no' || responseDataPull.data.endpointPullList[0].remoteSync == 'in-sync') {
                         callback(null, 'Alredy have the latest one');
                     } else {
-                        fs.writeFile(endPointFile, decodeURI(responseDataPull.data[0].businesslogic), new Date(responseDataPull.data[0].remoteModifiedDateTime), function(err) {
+                        fs.writeFile(endPointFile, decodeURI(responseDataPull.data.endpointPullList[0].businesslogic), new Date(responseDataPull.data.endpointPullList[0].remoteModifiedDateTime), function(err) {
                             if (err) {
                                 callback(err)
                             } else {
-                                fs.utimesSync(endPointFile, new Date(responseDataPull.data[0].remoteModifiedDateTime), new Date(responseDataPull.data[0].remoteModifiedDateTime));
+                                fs.utimesSync(endPointFile, new Date(responseDataPull.data.endpointPullList[0].remoteModifiedDateTime), new Date(responseDataPull.data.endpointPullList[0].remoteModifiedDateTime));
                                 callback(null, 'Updated Business Logic Successfully');
                             }
                         });
@@ -217,11 +219,11 @@ module.exports = function(processingData, callback) {
             }
         ],
         function(error, result) {
-            if (error) {
-                callback(error);
-            } else {
-                callback(null, result);
-            }
+                if (error) {
+                    callback(error);
+                } else {
+                    callback(null, result);
+                }
         }
     )
 }
