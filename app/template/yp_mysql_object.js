@@ -5,6 +5,7 @@ function YpMysqlObject(remoteEndPoint) {
     this.ypContext = JSON.parse(process.env.ypcontext);
     this.remoteDetails = {};
     this.ypContext.ypsettings.forEach(function(config) {
+        
         if (config.configValues.remoteName == remoteEndPoint) {
             this.remoteDetails = config;
         }
@@ -23,7 +24,6 @@ YpMysqlObject.prototype.setConnection = function() {
 }
 
 YpMysqlObject.prototype.execute = function(statement, args) {
-    /* Supports only Insert and Update  */
     var self = this;
 
     statement = statement.trim();
@@ -49,8 +49,6 @@ YpMysqlObject.prototype.execute = function(statement, args) {
                 }
             });
         });
-
-
     } else {
         return Promise.reject(new Error("Only Insert and Update option are permitted for this function"));
     }
@@ -58,7 +56,6 @@ YpMysqlObject.prototype.execute = function(statement, args) {
 
 
 YpMysqlObject.prototype.queryWithMysqlPromises = function(mysqlObj, statement) {
-    /* Function for refernce - Not used in process */
     var self = this;
 
     return mysqlObj.query(statement)
@@ -72,7 +69,6 @@ YpMysqlObject.prototype.queryWithMysqlPromises = function(mysqlObj, statement) {
 }
 
 YpMysqlObject.prototype.select = function(statement, args) {
-    /* Supports only select */
     var self = this;
     statement = statement.trim();
     let regExp = new RegExp(/^select\s/, "i");
@@ -99,10 +95,6 @@ YpMysqlObject.prototype.select = function(statement, args) {
     } else {
         return Promise.reject(new Error("Only Select option is permitted for this function"));
     }
-}
-
-YpMysqlObject.prototype.delete = function(statement, args) {
-    /* Supports only delete */
 }
 
 module.exports = YpMysqlObject

@@ -8,9 +8,7 @@ function YpStoreObject(remoteEndPoint) {
 
 
 YpStoreObject.prototype.insert = function(collectionName, insertData) {
-    /* Supports only Insert*/
     var self = this;
-
     let baseUrlParts = url.parse(storeSettings.storeUrl);
     let reqSchemeObj = storeSettings.storeReqObj;
     let writeData = {
@@ -58,7 +56,6 @@ YpStoreObject.prototype.insert = function(collectionName, insertData) {
 
 YpStoreObject.prototype.update = function(collectionName, objectReference, updateData) {
     var self = this;
-
     let baseUrlParts = url.parse(storeSettings.storeUrl);
     let reqSchemeObj = storeSettings.storeReqObj;
     let writeData = {

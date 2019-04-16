@@ -1,14 +1,22 @@
 let url = require('url');
 let querystring = require('querystring');
+let wshttps = require('https');
+let wshttp = require('http');
 
 function YpWebserviceObject(remoteEndPoint) {
+    this.ypContext = JSON.parse(process.env.ypcontext);
     this.remoteEndPoint = remoteEndPoint;
     this.remoteResponse = {
         "result": []
     };
     this.reqSchemeObj = wshttps;
+    this.endPoint = {};
+    for (let rmCount = 0; rmCount < this.ypContext.ypsettings.length; rmCount++) {
+        if (this.ypContext.ypsettings[rmCount].configValues.remoteName == remoteEndPoint) {
+            this.endPoint = this.ypContext.ypsettings[rmCount].configValues;
+        }
 
-    this.endPoint = remoteSets[remoteEndPoint];
+    }
 }
 YpWebserviceObject.prototype.setSchemeObj = function() {
     let url_parts = url.parse(this.endPoint.url);
@@ -21,8 +29,8 @@ YpWebserviceObject.prototype.setSchemeObj = function() {
 
 YpWebserviceObject.prototype.createOp = function(options) {
     if (options.qs) {
-        options.path =  options.path+"?"+querystring.stringify(options.qs);
-    } 
+        options.path = options.path + "?" + querystring.stringify(options.qs);
+    }
     return options;
 }
 
@@ -31,7 +39,7 @@ YpWebserviceObject.prototype.wsget = function(options) {
     let responseChunk = "";
     let url_parts = url.parse(this.endPoint.url);
     options.host = url_parts.hostname;
-    options.port=url_parts.port;
+    options.port = url_parts.port;
     options.method = "GET";
     let option = self.createOp(options);
     self.setSchemeObj();
@@ -56,7 +64,7 @@ YpWebserviceObject.prototype.wspost = function(options, data) {
     let self = this;
     let url_parts = url.parse(this.endPoint.url);
     options.host = url_parts.hostname;
-    options.port=url_parts.port;
+    options.port = url_parts.port;
     options.method = "POST";
     let option = self.createOp(options);
     self.setSchemeObj();
@@ -80,7 +88,7 @@ YpWebserviceObject.prototype.wsput = function(options, data) {
     let self = this;
     let url_parts = url.parse(this.endPoint.url);
     options.host = url_parts.hostname;
-    options.port=url_parts.port;
+    options.port = url_parts.port;
     options.method = "PUT";
     let option = self.createOp(options);
     self.setSchemeObj();
@@ -104,7 +112,7 @@ YpWebserviceObject.prototype.wsdelete = function(options, data) {
     let self = this;
     let url_parts = url.parse(this.endPoint.url);
     options.host = url_parts.hostname;
-    options.port=url_parts.port;
+    options.port = url_parts.port;
     options.method = "DELETE";
     let option = self.createOp(options);
     self.setSchemeObj();

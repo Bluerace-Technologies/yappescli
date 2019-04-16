@@ -181,15 +181,15 @@ module.exports = function(processingData, callback) {
                         });
                     },
                     function(file, response, callback) {
-                        /*   delete process.env.ypcontext;
-                           fs.unlink(file, function(err) {
-                               if (err) {
-                                   callback(err);
-                               } else {
-                                   callback(null, response);
-                               }
-                           });*/
-                        callback(null, response);
+                 /*       delete process.env.ypcontext;
+                        fs.unlink(file, function(err) {
+                            if (err) {
+                                callback(err);
+                            } else {
+                                callback(null, response);
+                            }
+                        });*/
+                        callback(null,response);
                     }
                 ], function(err, result) {
                     if (err) {
@@ -209,5 +209,3 @@ module.exports = function(processingData, callback) {
         }
     )
 }
-//after pulling the details of the connectors will be stored in the settings.json 
-//then at tbe time of execution the fetch the connector associated to the endpoint
