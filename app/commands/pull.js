@@ -13,6 +13,8 @@ let pathYpSetting = "";
 let ypSettings = "";
 let endPointFile = "";
 let responseDataPull = "";
+const spinner = ora('Loading unicorns').start();
+
 
 module.exports = function(processingData, callback) {
     let cliPullData = {
