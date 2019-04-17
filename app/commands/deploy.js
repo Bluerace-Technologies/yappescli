@@ -13,7 +13,8 @@ module.exports = function(processingData, callback) {
     let apiNameError = 'API Name is Invalid';
     let updateBusinessLogicData = {
         "endpointReference": "",
-        "businessLogic": ""
+        "businessLogic": "",
+        "lastModifiedDateTime" : ""
     }
     let pathEndPoint = "";
     let pathYpSetting = "";
@@ -31,6 +32,17 @@ module.exports = function(processingData, callback) {
                         callback(null);
                     }
                 });                    
+            },
+            function(callback){
+                fs.stat(businesslogicFile, function(err, stats) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        let mtime = new Date(util.inspect(stats.mtime));
+                        updateBusinessLogicData.lastModifiedDateTime = mtime;
+                        callback(null);
+                    }
+                });
             },
             function(callback) {
                 fs.readFile(businesslogicFile, 'utf8', function(err, data){
@@ -61,10 +73,10 @@ module.exports = function(processingData, callback) {
                         for (apiNameIndex = 0; apiNameIndex < ypSettings.apiReferences.length; apiNameIndex++) {
                             endpointIndex = 0;
                             if (ypSettings.apiReferences[apiNameIndex].apiName == processingData.apiName) {
-                                for (apiNameIndex = 0; apiNameIndex < ypSettings.apiReferences.length; apiNameIndex++) {
+                                for (endpointIndex = 0; ypSettings.apiReferences[apiNameIndex].endPointReferences.length > endpointIndex; endpointIndex++) {
                                     if (ypSettings.apiReferences[apiNameIndex].endPointReferences[endpointIndex].endpointName == processingData.endPointName) {
                                         updateBusinessLogicData.endpointReference = ypSettings.apiReferences[apiNameIndex].endPointReferences[endpointIndex].hash;
-                                    }
+                                    } 
                                     errorCondition = false;
                                 }
                                 break;

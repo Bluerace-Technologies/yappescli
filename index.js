@@ -119,8 +119,30 @@ program
             }
         });
     });
+
+program
+    .command('pull')
+    .alias('pl')
+    .description('Pulling the business logic changes to local')
+    .option('-a, --apiname <apiname>', 'API Name to enter')
+    .option('-e, --endpointname <endpointname>', 'Endpoint Name to enter')
+    .action(function(options) {
+        let inputData = {
+            "apiName": options.apiname,
+            "endPointName": options.endpointname
+        };
+        yappesCliObj.executeCommand('pull', inputData, function(err, results) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(results);
+            }
+        });
+    });
+
 program.on('command:*', function () {
   console.error('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
   program.help();
 });
+
 program.parse(process.argv);
