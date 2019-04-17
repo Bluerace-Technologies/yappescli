@@ -7,14 +7,21 @@ let { normalize } = require('../utils/yp_normalize');
 const util = require('util');
 const async = require('async');
 const { customErrorConfig } = require('../configs/yp_custom_error');
-let pathEndPoint = "";
-let pathYpSetting = "";
-let ypSettings = "";
-let endPointFile = "";
-let responseDataPull = "";
 const inquirer = require("inquirer");
 const chalk = require('chalk');
-var clock = [
+
+module.exports = function(processingData, callback) {
+    let cliPullData = {
+        "apiName": "",
+        "endpointDetails": []
+    }
+    endPointsBulkArray = [];
+    let pathEndPoint = "";
+    let pathYpSetting = "";
+    let ypSettings = "";
+    let endPointFile = "";
+    let responseDataPull = "";
+    let clock = [
             "⠋",
             "⠙",
             "⠹",
@@ -27,19 +34,13 @@ var clock = [
             "⠏"
         ];
 
-var i = 0;
-var ui = new inquirer.ui.BottomBar();
+    let counter = 0;
+    let ui = new inquirer.ui.BottomBar();
 
-var tickInterval = setInterval(() =>{
-  ui.updateBottomBar(chalk.yellowBright(clock[i++ % clock.length]));
-}, 250);
+    let tickInterval = setInterval(() =>{
+      ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
+    }, 250);
 
-module.exports = function(processingData, callback) {
-    let cliPullData = {
-        "apiName": "",
-        "endpointDetails": []
-    }
-    endPointsBulkArray = [];
     async.waterfall([
             function(callback) {
                 if (processingData.endPointName == undefined) {
@@ -103,7 +104,7 @@ module.exports = function(processingData, callback) {
                             setTimeout(function() {
                                 ui.log.write(chalk.green('✓ Collecting api and its endpoint details.'));
                             }, 1000);
-                            callback(null)
+                            callback(null);
                         }
                     });
                 }
@@ -269,7 +270,7 @@ module.exports = function(processingData, callback) {
 function writeFile(path, remoteData, remoteModTime, callback) {
     fs.writeFile(path, decodeURI(remoteData), function(err) {
         if (err) {
-            callback(err)
+            callback(err);
         } else {
             fs.utimesSync(path, remoteModTime, remoteModTime);
             callback(null);

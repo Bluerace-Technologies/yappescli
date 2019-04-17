@@ -40,7 +40,7 @@ module.exports = function(processingData, callback) {
                     } else {
                         let mtime = new Date(util.inspect(stats.mtime));
                         updateBusinessLogicData.lastModifiedDateTime = mtime;
-                        callback(null)
+                        callback(null);
                     }
                 });
             },
