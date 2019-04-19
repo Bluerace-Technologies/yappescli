@@ -9,9 +9,7 @@
     const ypresponse = ypresponseFunction();
     try {
         logicTemplate
-
         console.log(ypresponse);
-
     } catch (error) {
         console.log(error);
     }
