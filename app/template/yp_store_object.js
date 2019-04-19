@@ -1,4 +1,7 @@
 let url = require('url');
+const netrc = require('netrc');
+const { configs } = require('../configs/yp_configs');
+
 function YpStoreObject(remoteEndPoint) {
     this.remoteEndPoint = remoteEndPoint;
     this.remoteResponse = {
@@ -9,18 +12,24 @@ function YpStoreObject(remoteEndPoint) {
 
 YpStoreObject.prototype.insert = function(collectionName, insertData) {
     var self = this;
+    let netrcObj = netrc();
+    let hostObj = configs().getHostDetails();
+    let apiData = JSON.parse(process.env.ypcontext);
+    let storeSettings = {
+        storeUrl: "http://localhost:3001/api/cli/content/store/remote/objects",
+        storeReqObj: require('http')
+    }
     let baseUrlParts = url.parse(storeSettings.storeUrl);
     let reqSchemeObj = storeSettings.storeReqObj;
     let writeData = {
-        "collectionName":collectionName,
-        "insertInfo":insertData,
-        "apiId":dependentData.apiId,
-        "ownerId":dependentData.ownerId,
-        "operations":"insert"
+        "collectionName": collectionName,
+        "insertInfo": insertData,
+        "apiId": apiData.apiHash,
+        "ownerId": netrcObj[hostObj.host].login,
+        "operations": "insert"
     }
-
     let passThroughHeaders = {
-        "yid": dependentData.yid,
+        "yid": '',
         "Content-Type": "application/json"
     }
     let options = {
@@ -34,7 +43,7 @@ YpStoreObject.prototype.insert = function(collectionName, insertData) {
         options.path += baseUrlParts.search;
     }
     writeData = JSON.stringify(writeData);
-    return new Promise(function(resolve, reject) {  
+    return new Promise(function(resolve, reject) {
         let reqProcess = reqSchemeObj.request(options, function(storeResponse) {
             let responseStream = '';
 
@@ -44,31 +53,38 @@ YpStoreObject.prototype.insert = function(collectionName, insertData) {
 
             storeResponse.on('end', function() {
                 resolve(responseStream);
-            });            
+            });
         });
         reqProcess.on('error', function(err) {
             reject(err);
-        });       
+        });
         reqProcess.write(writeData);
-        reqProcess.end();             
+        reqProcess.end();
     });
 }
 
 YpStoreObject.prototype.update = function(collectionName, objectReference, updateData) {
     var self = this;
+    let netrcObj = netrc();
+    let hostObj = configs().getHostDetails();
+    let apiData = JSON.parse(process.env.ypcontext);
+    let storeSettings = {
+        storeUrl: "http://localhost:3001/api/cli/content/store/remote/objects",
+        storeReqObj: require('http')
+    }
     let baseUrlParts = url.parse(storeSettings.storeUrl);
     let reqSchemeObj = storeSettings.storeReqObj;
     let writeData = {
-        "collectionName":collectionName,
-        "updateInfo":updateData,
-        "apiId":dependentData.apiId,
-        "ownerId":dependentData.ownerId,
-        "operations":"update",
-        "objectId":objectReference
+        "collectionName": collectionName,
+        "updateInfo": updateData,
+        "apiId": apiData.apiHash,
+        "ownerId": netrcObj[hostObj.host].login,
+        "operations": "update",
+        "objectId": objectReference
     }
 
     let passThroughHeaders = {
-        "yid": dependentData.yid,
+        "yid": '',
         "Content-Type": "application/json"
     }
     let options = {
@@ -82,7 +98,7 @@ YpStoreObject.prototype.update = function(collectionName, objectReference, updat
         options.path += baseUrlParts.search;
     }
     writeData = JSON.stringify(writeData);
-    return new Promise(function(resolve, reject) {   
+    return new Promise(function(resolve, reject) {
         let reqProcess = reqSchemeObj.request(options, function(storeResponse) {
             let responseStream = '';
 
@@ -92,32 +108,36 @@ YpStoreObject.prototype.update = function(collectionName, objectReference, updat
 
             storeResponse.on('end', function() {
                 resolve(responseStream);
-            });            
+            });
         });
         reqProcess.on('error', function(err) {
             reject(err);
-        });       
+        });
         reqProcess.write(writeData);
-        reqProcess.end();             
+        reqProcess.end();
     });
 }
 
 YpStoreObject.prototype.query = function(collectionName, queryData) {
-
     var self = this;
-
+    let netrcObj = netrc();
+    let hostObj = configs().getHostDetails();
+    let apiData = JSON.parse(process.env.ypcontext);
+    let storeSettings = {
+        storeUrl: "http://localhost:3001/api/cli/content/store/remote/objects",
+        storeReqObj: require('http')
+    }
     let baseUrlParts = url.parse(storeSettings.storeUrl);
     let reqSchemeObj = storeSettings.storeReqObj;
     let writeData = {
-        "collectionName":collectionName,
-        "queryInfo":queryData,
-        "apiId":dependentData.apiId,
-        "ownerId":dependentData.ownerId,
-        "operations":"query"
+        "collectionName": collectionName,
+        "queryInfo": queryData,
+        "apiId": apiData.apiHash,
+        "ownerId": netrcObj[hostObj.host].login,
+        "operations": "query"
     }
-
     let passThroughHeaders = {
-        "yid": dependentData.yid,
+        "yid": '',
         "Content-Type": "application/json"
     }
     let options = {
@@ -131,7 +151,7 @@ YpStoreObject.prototype.query = function(collectionName, queryData) {
         options.path += baseUrlParts.search;
     }
     writeData = JSON.stringify(writeData);
-    return new Promise(function(resolve, reject) {   
+    return new Promise(function(resolve, reject) {
         let reqProcess = reqSchemeObj.request(options, function(storeResponse) {
             let responseStream = '';
 
@@ -141,15 +161,13 @@ YpStoreObject.prototype.query = function(collectionName, queryData) {
 
             storeResponse.on('end', function() {
                 resolve(responseStream);
-            });            
+            });
         });
         reqProcess.on('error', function(err) {
             reject(err);
-        });       
+        });
         reqProcess.write(writeData);
-        reqProcess.end();             
+        reqProcess.end();
     });
 }
-
-
 module.exports = YpStoreObject

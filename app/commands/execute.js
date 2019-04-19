@@ -15,11 +15,18 @@ module.exports = function(processingData, callback) {
         "endpointReference": "",
         "businessLogic": ""
     }
+    let netrcObj = netrc();
     let pathEndPoint = "";
     let apiNamePath = "";
     let pathYpSetting = "";
     let ypSettings = "";
     let businesslogicFile = "";
+    let hostObj = configs().getHostDetails();
+    if (netrcObj.hasOwnProperty(hostObj.host)) {
+        loginUser = netrcObj[hostObj.host].login;
+    } else {
+        callback("You are not logged in. Please login using the command 'yappescli login'");
+    }
     async.waterfall([
             function(callback) {
                 configs().getConfigSettings(function(err, data) {
@@ -88,12 +95,14 @@ module.exports = function(processingData, callback) {
                     function(callback) {
                         let cmd = 'npm root -g';
                         let context = [];
+                        let apiData = "";
                         ypSettings.apiReferences.forEach(function(apiRef) {
                             if (processingData.apiName == apiRef.apiName) {
                                 context = apiRef.remoteEndpoints;
+                                apiHash = apiRef.hash;
                             }
                         });
-                        process.env.ypcontext = JSON.stringify({ ypsettings: context });
+                        process.env.ypcontext = JSON.stringify({ ypsettings: context, apiHash: apiHash });
                         nodeCmd.get(cmd, function(err, nodeModulePath) {
                             if (err) {
                                 callback(err);
@@ -181,15 +190,14 @@ module.exports = function(processingData, callback) {
                         });
                     },
                     function(file, response, callback) {
-                 /*       delete process.env.ypcontext;
+                        delete process.env.ypcontext;
                         fs.unlink(file, function(err) {
                             if (err) {
                                 callback(err);
                             } else {
                                 callback(null, response);
                             }
-                        });*/
-                        callback(null,response);
+                        });
                     }
                 ], function(err, result) {
                     if (err) {
