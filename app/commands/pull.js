@@ -181,8 +181,8 @@ module.exports = function(processingData, callback) {
                 ypRequest.call(endPointPath, "post", cliPullData, function(err, statusResponse) {
                     if (err) {
                         ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
+                        clearInterval(tickInterval);
+                        ui.close();
                         callback(err);
                     } else {
                         setTimeout(function() {
