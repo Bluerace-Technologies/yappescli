@@ -70,7 +70,7 @@ module.exports = function(processingData, callback) {
                                     }
                                 }
                                 hashArr=hashArr.reverse();
-                                let resourceDetails = { "endpointName": listFile[fileNumber], "lastModifiedDateTime": mtime ,"hash":hashArr[fileNumber]};
+                                let resourceDetails = { "endpointName": listFile[fileNumber], "lastModifiedDateTime": mtime ,"hashReference":hashArr[fileNumber]};
                                 apiDetails.endpointDetails.push(resourceDetails);
                                 fileNumber++;
                                 callback(null);
