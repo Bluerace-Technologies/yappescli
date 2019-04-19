@@ -86,8 +86,8 @@ module.exports = function(processingData, callback) {
                             endPointsBulkArray = files;
                             setTimeout(function() {
                                 ui.log.write(chalk.green('✓ Collecting api and its endpoint details.'));
+                                callback(null);
                             }, 1000);
-                            callback(null);
                         }
                     });
                 } else {
@@ -102,9 +102,9 @@ module.exports = function(processingData, callback) {
                             cliPullData.apiName = processingData.apiName;
                             cliPullData.endpointDetails.push({ "endpointName": processingData.endPointName, "lastModifiedDateTime": mtime });
                             setTimeout(function() {
+                                callback(null);
                                 ui.log.write(chalk.green('✓ Collecting api and its endpoint details.'));
                             }, 1000);
-                            callback(null);
                         }
                     });
                 }
@@ -181,13 +181,13 @@ module.exports = function(processingData, callback) {
                 ypRequest.call(endPointPath, "post", cliPullData, function(err, statusResponse) {
                     if (err) {
                         ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
+                        clearInterval(tickInterval);
+                        ui.close();
                         callback(err);
                     } else {
                         setTimeout(function() {
                             ui.log.write(chalk.green('✓ Making pull request to remote.'));
-                        }, 2000);
+                        }, 1000);
                         if (processingData.endPointName == undefined) {
                             if (statusResponse.code == 200) {
                                 responseDataPull = statusResponse;
@@ -262,7 +262,7 @@ module.exports = function(processingData, callback) {
                     callback(null,result);
                     ui.updateBottomBar(chalk.green('✓ Pull command execution completed'));
                     ui.close();
-                }, 3000);
+                }, 1000);
             }
         });
 }
