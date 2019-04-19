@@ -121,6 +121,27 @@ program
     });
 
 program
+    .command('execute')
+    .alias('ex')
+    .description('execute the business logic for the endpoint')
+    .option('-a, --apiname <apiname>', 'API Name to enter')
+    .option('-e, --endpointname <endpointname>', 'Endpoint Name to enter')
+    .option('-r, --run <runflag>', 'execute the business logic in remote or local')
+    .action(function(options) {
+        let inputData = {
+            "apiName": options.apiname,
+            "endPointName": options.endpointname
+        };
+       yappesCliObj.executeCommand('execute', inputData, function(err, results) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(results);
+            }
+        });
+    });
+
+program
     .command('pull')
     .alias('pl')
     .description('Pulling the business logic changes to local')

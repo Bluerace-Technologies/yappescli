@@ -6,6 +6,7 @@ var async = require('async');
 const netrc = require('netrc');
 const nodeCmd = require('node-cmd');
 let { normalize } = require('../utils/yp_normalize');
+let path = require("path");
 let settingFileName = ".ypsettings.json";
 const { customErrorConfig } = require('../configs/yp_custom_error');
 
@@ -129,6 +130,15 @@ module.exports = function(processingData, callback) {
                     }
                 });
             }
+        },function(result,callback){
+            createYpClasses(workspace,apiHashDetails,function(err){
+                if (err) {
+                    callback(err);
+                }
+                else{
+                    callback(null,result);
+                }
+            });
         }
     ], function(err, res) {
         if (err) {
@@ -160,6 +170,7 @@ function createSettingsFile(apiHashDetails, workspace, callback) {
                 apiReferences: [{
                     apiName: apiHashDetails.apiDetails.apiName,
                     hash: apiHashDetails.apiDetails.hash,
+                    remoteEndpoints:apiHashDetails.apiDetails.remoteEndpoints,
                     endPointReferences: []
                 }]
             };
@@ -170,7 +181,7 @@ function createSettingsFile(apiHashDetails, workspace, callback) {
                 };
                 settingsData.apiReferences[0].endPointReferences.push(endPointTempVar);
             }
-            fs.writeFile(path + settingFileName, JSON.stringify(settingsData), function(err) {
+            fs.writeFile(path + settingFileName, JSON.stringify(settingsData,null,4), function(err) {
                 if (err) {
                     callback(err);
                 } else {
@@ -201,6 +212,7 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
                 apiReferences: {
                     apiName: apiHashDetails.apiDetails.apiName,
                     hash: apiHashDetails.apiDetails.hash,
+                    remoteEndpoints:apiHashDetails.apiDetails.remoteEndpoints,
                     endPointReferences: []
                 }
             };
@@ -235,7 +247,7 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
             });
         },
         function(fileData, callback) {
-            fs.writeFile(path + settingFileName, JSON.stringify(fileData), function(err) {
+            fs.writeFile(path + settingFileName, JSON.stringify(fileData,null,4), function(err) {
                 if (err) { callback(err) } else {
                     callback(null);
                 }
@@ -280,3 +292,42 @@ function createWsPath(path, callback) {
     });
 
 }
+function createYpClasses(workspace, apiHashDetails, callback) {
+    let path = workspace;
+    let commandOptions = resolveOSCommands();
+    let requestFile = 'yprequest.json';
+    let responseFile = 'ypresponse.json';
+    let touchCmd = commandOptions['create-dir'] + ' -p ' + path + '/' + apiHashDetails.apiDetails.apiName + '/test';
+    nodeCmd.get(touchCmd, function(err, data) {
+        if (err) {
+            callback(err);
+        } else {
+            async.waterfall([function(callback) {
+                fs.readFile(__dirname + '/../tests/reqresdata.js', 'UTF-8', function(err, data) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        let content = JSON.stringify(data);
+                        callback(null, data);
+                    }
+                });
+            }, function(fileData, callback) {
+                let reqResObject = fileData;
+                fs.writeFile(path + '/' + apiHashDetails.apiDetails.apiName + '/test/' + 'executestub.js', reqResObject, function(err) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        callback(null);
+                    }
+                });
+            }], function(err) {
+                if (err) {
+                    callback(err);
+                } else {
+                    callback(null);
+                }
+            });
+        }
+    });
+}
+
