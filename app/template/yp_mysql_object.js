@@ -125,19 +125,6 @@ YpMysqlObject.prototype.execute = function(statement, args) {
     }
 }
 
-YpMysqlObject.prototype.queryWithMysqlPromises = function(mysqlObj, statement) {
-    var self = this;
-
-    return mysqlObj.query(statement)
-        .then(function(rows) {
-            self.remoteResponse.result = rows[0];
-            return mysqlObj.close();
-        })
-        .then(function() {
-            return self.remoteResponse;
-        });
-}
-
 YpMysqlObject.prototype.select = function(statement, args) {
     var self = this;
     statement = statement.trim();
