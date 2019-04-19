@@ -78,10 +78,10 @@ module.exports = function(processingData, callback) {
                 fs.readFile(businesslogicFile, 'utf8', function(err, data) {
                     if (err) {
                         error_code = 3000;
-                        if (err.errno == -2) {
                             ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
                             clearInterval(tickInterval);
                             ui.close();
+                        if (err.errno == -2) {    
                             callback(customErrorConfig().customError.ENOENT);
                         } else if (err.code == 1) {
                             callback(customErrorConfig().customError.EACCES);
@@ -91,10 +91,10 @@ module.exports = function(processingData, callback) {
                     } else {
                         setTimeout(function() {
                             ui.log.write(chalk.green('✓ Checking the apiname and endpointname...'));
+                            businessLogic = data;
+                            updateBusinessLogicData.businessLogic = data;
+                            callback(null, updateBusinessLogicData)
                         }, 1000);
-                        businessLogic = data;
-                        updateBusinessLogicData.businessLogic = data;
-                        callback(null, updateBusinessLogicData)
                     }
                 });
             },
@@ -131,8 +131,8 @@ module.exports = function(processingData, callback) {
                         } else {
                             setTimeout(function() {
                                 ui.log.write(chalk.green('✓ Getting the latest code from local...'));
+                                callback(null, updateBusinessLogicData);
                             }, 1000);
-                            callback(null, updateBusinessLogicData);
                         }
                     }
                 });
@@ -152,6 +152,9 @@ module.exports = function(processingData, callback) {
                                 callback(null, statusResponse);
                             }, 1000);
                         } else {
+                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                            clearInterval(tickInterval);
+                            ui.close();
                             callback(statusResponse.data.message);
                         }
                     }
@@ -168,7 +171,7 @@ module.exports = function(processingData, callback) {
                     callback(null, result.data.message);
                     ui.updateBottomBar(chalk.green('✓ Deploy command execution completed'));
                     ui.close();
-                }, 3000);
+                }, 1000);
             }
         }
     )

@@ -54,7 +54,7 @@ module.exports = function(processingData, callback) {
                 ui.updateBottomBar(chalk.green('✓ Login completed. \n'));
                 ui.close();
                 callback(null, "Successfully authenticated!!");
-            }, 2000)
+            }, 1000)
         }
     });
 }

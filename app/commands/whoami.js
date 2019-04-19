@@ -42,7 +42,7 @@ module.exports = function(processingData, callback){
                 ui.updateBottomBar(chalk.green('✓ You are Logged in. \n'));
                 ui.close();         
                 callback(null, loginUser);
-            },2000)
+            },1000)
     } else {
         setTimeout(function() {
                 clearInterval(tickInterval);
@@ -50,6 +50,6 @@ module.exports = function(processingData, callback){
                 ui.updateBottomBar(chalk.green('✓ Login Required. \n'));
                 ui.close();         
                 callback("You are not logged in. Please login using the command 'yappescli login'");
-            },2000)
+            },1000)
     }
 }
