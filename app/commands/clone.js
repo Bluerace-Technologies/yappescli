@@ -170,18 +170,20 @@ function createSettingsFile(apiHashDetails, workspace, callback) {
                 apiReferences: [{
                     apiName: apiHashDetails.apiDetails.apiName,
                     hash: apiHashDetails.apiDetails.hash,
-                    remoteEndpoints:apiHashDetails.apiDetails.remoteEndpoints,
+                    yappesUrls:apiHashDetails.apiDetails.urls,
+                    remoteEndpoints: apiHashDetails.apiDetails.remoteEndpoints,
                     endPointReferences: []
                 }]
             };
             for (var i = 0; i < apiHashDetails.endpointDetails.length; i++) {
                 let endPointTempVar = {
                     endpointName: apiHashDetails.endpointDetails[i].endPointName,
-                    hash: apiHashDetails.endpointDetails[i].hash
+                    hash: apiHashDetails.endpointDetails[i].hash,
+                    endPoint: apiHashDetails.endpointDetails[i].endPoint
                 };
                 settingsData.apiReferences[0].endPointReferences.push(endPointTempVar);
             }
-            fs.writeFile(path + settingFileName, JSON.stringify(settingsData,null,4), function(err) {
+            fs.writeFile(path + settingFileName, JSON.stringify(settingsData, null, 4), function(err) {
                 if (err) {
                     callback(err);
                 } else {
@@ -212,6 +214,7 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
                 apiReferences: {
                     apiName: apiHashDetails.apiDetails.apiName,
                     hash: apiHashDetails.apiDetails.hash,
+                    yappesUrls:apiHashDetails.apiDetails.urls,
                     remoteEndpoints:apiHashDetails.apiDetails.remoteEndpoints,
                     endPointReferences: []
                 }
@@ -220,7 +223,8 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
             for (var i = 0; i < apiHashDetails.endpointDetails.length; i++) {
                 let endPointTempVar = {
                     endpointName: apiHashDetails.endpointDetails[i].endPointName,
-                    hash: apiHashDetails.endpointDetails[i].hash
+                    hash: apiHashDetails.endpointDetails[i].hash,
+                    endPoint: apiHashDetails.endpointDetails[i].endPoint
                 };
                 settingsData.apiReferences.endPointReferences.push(endPointTempVar);
             }
