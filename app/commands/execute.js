@@ -9,6 +9,10 @@ const util = require('util');
 const async = require('async');
 const { customErrorConfig } = require('../configs/yp_custom_error');
 const nodeCmd = require('node-cmd');
+const http = require('http');
+const https = require('https');
+const url = require('url');
+const qs = require('qs');
 
 module.exports = function(processingData, callback) {
     let apiNameError = 'API Name is Invalid';
@@ -226,9 +230,22 @@ module.exports = function(processingData, callback) {
                         callback(err);
                     } else {
                         let yappesConfig = JSON.parse(data);
-                        processingData.yappesEnvironment=yappesConfig.yappesEnvironment;
-                        processingData.yappesKey=yappesConfig.yappesKey;
-                        callback(null);
+                        let environmentList = ['development', 'testing', 'production'];
+                        if (!yappesConfig.yappesEnvironment) {
+                            yappesConfig.yappesEnvironment = 'development';
+                        }
+                        if (environmentList.indexOf(yappesConfig.yappesEnvironment) > -1) {
+                            processingData.yappesEnvironment = yappesConfig.yappesEnvironment;
+                            processingData.yappesKey = yappesConfig.yappesKey;
+                            processingData.body = yappesConfig.body;
+                            processingData.queryparams = yappesConfig.queryParameters;
+                            processingData.headers = yappesConfig.headers;
+                            processingData.pathParameters = yappesConfig.pathParameters;
+                            callback(null);
+                        } else {
+                            let errMsg = "The available environments are as follows : 'development','testing'";
+                            callback(errMsg);
+                        }
                     }
                 });
             },
@@ -242,9 +259,11 @@ module.exports = function(processingData, callback) {
                 });
             },
             function(status, callback) {
-                let localAhead = true; //local is ahead;
+                let localAhead = false; //local is ahead;
+                let epExist = false; // wrong name passed
                 status.data.forEach(function(epStatus) {
                     if (processingData.endPointName == epStatus.endpointName) {
+                        epExist = true;
                         if (epStatus.remoteSync == 'yes') {
                             localAhead = false;
                         } else if (epStatus.remoteSync == 'no') {
@@ -254,11 +273,16 @@ module.exports = function(processingData, callback) {
                         }
                     }
                 });
-                if (localAhead) {
-                    callback("local code is ahead");
+                if (epExist) {
+                    if (localAhead) {
+                        callback(" Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n");
+                    } else {
+                        callback(null);
+                    }
                 } else {
-                    callback(null);
+                    callback("End Point name is wrong");
                 }
+
             },
             function(callback) {
                 configs().getConfigSettings(function(err, data) {
@@ -278,14 +302,17 @@ module.exports = function(processingData, callback) {
                         let ypSettings = JSON.parse(data);
                         let yappesEndpointConfig = {
                             url: "",
-                            endPoint: ""
+                            endPoint: "",
+                            method: ""
                         };
                         ypSettings.apiReferences.forEach(function(apiRef) {
                             if (processingData.apiName == apiRef.apiName) {
                                 yappesEndpointConfig.url = apiRef.yappesUrls;
                                 apiRef.endPointReferences.forEach(function(endpoints) {
-                                    if (processingData.endPointName == endpoints.endpointName) {
+
+                                    if (processingData.endPointName.toLowerCase() == endpoints.endpointName.toLowerCase()) {
                                         yappesEndpointConfig.endPoint = endpoints.endPoint;
+                                        yappesEndpointConfig.method = endpoints.method;
                                     }
                                 });
                             }
@@ -295,9 +322,52 @@ module.exports = function(processingData, callback) {
                 });
             },
             function(yappesEndpointConfig, callback) {
+                if (yappesEndpointConfig.endPoint.includes('{') || yappesEndpointConfig.endPoint.includes('}')) {
+                    let endpointArr = yappesEndpointConfig.endPoint.split("/");
+                    let pathParamsList = Object.keys(processingData.pathParameters);
+                    let pathValuesList = Object.values(processingData.pathParameters);
+                    let paramsLength = pathParamsList.length;
+                    let keyCount = 0;
+                    let tempArr = [];
+                    endpointArr.forEach(function(el) {
+                        if (el.includes('{')) {
+                            el = el.replace(/[{}]/g, "");
+                            tempArr.push(el);
+                        }
+                    });
+                    pathParamsList.forEach(
+                        function(endpointElements) {
+                            if (endpointArr.indexOf('{' + endpointElements + '}') > -1) {
+                                yappesEndpointConfig.endPoint = yappesEndpointConfig.endPoint.replace('{' + endpointElements + '}', pathValuesList[keyCount]);
+                                keyCount++;
+                            }
+                        });
+                    if (keyCount == tempArr.length) {
+                        callback(null, yappesEndpointConfig);
+                    } else {
+                        callback("wrong path parameters passed");
+                    }
+                } else {
+                    callback(null, yappesEndpointConfig);
+                }
+
+            },
+            function(yappesEndpointConfig, callback) {
                 let yappesBaseUrl = yappesEndpointConfig.url[processingData.yappesEnvironment];
                 let yappesUrl = yappesBaseUrl + yappesEndpointConfig.endPoint;
-                callback(null, yappesUrl);
+                let parameters = {
+                    method: yappesEndpointConfig.method,
+                    headers: processingData.headers,
+                    queryparams: processingData.queryparams,
+                    payload: processingData.body
+                };
+                runLogic(yappesUrl, parameters, processingData.yappesKey, function(err, response) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        callback(response);
+                    }
+                });
             }
         ], function(err, response) {
             if (err) {
@@ -307,4 +377,67 @@ module.exports = function(processingData, callback) {
             }
         });
     }
+}
+
+function runLogic(apiUrl, parameters, yappesKey, callback) {
+    let self = this;
+    let reqSchemeObj = https;
+    let responseChunk = "";
+    let methodList = ["get", "post", "put", "delete", "patch"];
+    if (parameters.method) {
+        if (parameters.method === parameters.method.toUpperCase()) {
+            parameters.method = parameters.method.toLowerCase();
+        } else {
+            parameters.method = parameters.method.toLowerCase();
+        }
+        if (methodList.indexOf(parameters.method) == -1) {
+            callback(new Error("Error 405 Unsupported Method/Method Not Allowed. Please refer read me section"));
+        }
+    } else {
+        callback(new Error("Method not Available in parameters"));
+    }
+
+
+    let urlParts = url.parse(apiUrl);
+    let options = {
+        host: urlParts.hostname,
+        path: urlParts.pathname,
+        port: urlParts.port ? urlParts.port : 98,
+        method: parameters.method,
+        headers: parameters.headers
+    };
+    if (options.method != "get") {
+        if (Object.keys(parameters.payload).length <= 0) {
+            return callback(new Error("Payload required for PUT/POST Methods"));
+        }
+    }
+    options.headers["X-YAPPES-KEY"] = yappesKey;
+    if (!options.port) {
+        options.port = 443;
+    }
+    if (Object.keys(parameters.queryparams).length > 0) {
+        options.path += "?" + qs.stringify(parameters.queryparams, {
+            encode: false
+        });
+    }
+
+    if (!urlParts.protocol.match(/https+/)) {
+        reqSchemeObj = http;
+    } else {
+        reqSchemeObj = https;
+    }
+    let requestObj = reqSchemeObj.request(options, function(response) {
+        response.on('data', function(chunk) {
+            responseChunk += chunk;
+        });
+        response.on('end', function() {
+            callback(null, responseChunk);
+        });
+    });
+    requestObj.write(JSON.stringify(parameters.payload));
+    requestObj.on('error', function(err) {
+        callback(err);
+    });
+
+    requestObj.end();
 }
