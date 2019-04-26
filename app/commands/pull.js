@@ -3,7 +3,7 @@ const netrc = require('netrc');
 const { configs } = require('../configs/yp_configs');
 let { resolveOSCommands } = require('../utils/yp_resolve_os');
 let ypRequest = require('../utils/yp_request');
-let { normalize } = require('../utils/yp_normalize');
+let { normalize,customMessage,invalidName } = require('../utils/yp_normalize');
 const util = require('util');
 const async = require('async');
 const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
@@ -15,12 +15,13 @@ module.exports = function(processingData, callback) {
         "apiName": "",
         "endpointDetails": []
     }
-    endPointsBulkArray = [];
+    let endPointsBulkArray = [];
     let pathEndPoint = "";
     let pathYpSetting = "";
     let ypSettings = "";
     let endPointFile = "";
     let responseDataPull = "";
+    let workspacePath = "";
     let clock = [
             "⠋",
             "⠙",
@@ -51,22 +52,22 @@ module.exports = function(processingData, callback) {
                     loginUser = netrcObj[hostObj.host].login;
                     callback(null);
                 } else {
-                    // callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
-                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
                     clearInterval(tickInterval);
                     ui.close();
-                    callback(customErrorConfig().customError.VALIDATION_ERROR_LOGIN);
+                    callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
                 }
             },
             function(callback) {
                 if (processingData.endPointName == undefined) {
                     configs().getConfigSettings(function(err, data) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
                             clearInterval(tickInterval);
                             ui.close();
                             callback(err);
                         } else {
+                            workspacePath = JSON.parse(data).path;
                             pathEndPoint = JSON.parse(data).path + normalize(processingData.apiName) + "/endpoints/";
                             pathYpSetting = JSON.parse(data).path + '.ypsettings.json';
                             ui.log.write(chalk.green('✓ Execution starts....'));
@@ -76,11 +77,12 @@ module.exports = function(processingData, callback) {
                 } else {
                     configs().getConfigSettings(function(err, data) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
                             clearInterval(tickInterval);
                             ui.close();
                             callback(err);
                         } else {
+                            workspacePath = JSON.parse(data).path;
                             pathEndPoint = JSON.parse(data).path + normalize(processingData.apiName) + "/endpoints/";
                             pathYpSetting = JSON.parse(data).path + '.ypsettings.json';
                             endPointFile = pathEndPoint + normalize(processingData.endPointName) + ".js";
@@ -94,10 +96,12 @@ module.exports = function(processingData, callback) {
                 if (processingData.endPointName == undefined) {
                     fs.readdir(pathEndPoint, function(err, files) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
                             clearInterval(tickInterval);
                             ui.close();
-                            callback(customErrorConfig().customError.INVALID_APINAME.errorMessage); // change
+                            invalidName(workspacePath,function(error){
+                                callback(error);
+                            });
                         } else {
                             endPointsBulkArray = files;
                             setTimeout(function() {
@@ -109,10 +113,10 @@ module.exports = function(processingData, callback) {
                 } else {
                     fs.stat(endPointFile, function(err, stats) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
                             clearInterval(tickInterval);
                             ui.close();
-                            callback(customErrorConfig().customError.INVALID_APINAME.errorMessage); // change
+                            callback(customMessage(customErrorConfig().customError.APIEPERR.errorMessage)); 
                         } else {
                             let mtime = new Date(util.inspect(stats.mtime));
                             cliPullData.apiName = processingData.apiName;
@@ -184,7 +188,7 @@ module.exports = function(processingData, callback) {
                                 }
                             }
                             if (errorCondition) {
-                                callback(customErrorConfig().customError.INVALID_ENDPOINTNAME.errorMessage);
+                                callback(customMessage(customErrorConfig().customError.INVALID_ENDPOINTNAME.errorMessage));
                             } else {
                                 callback(null, cliPullData);
                             }
@@ -196,7 +200,7 @@ module.exports = function(processingData, callback) {
                 let endPointPath = "/cli/endpoint/pull/"
                 ypRequest.call(endPointPath, "post", cliPullData, function(err, statusResponse) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
                         clearInterval(tickInterval);
                         ui.close();
                         callback(err);
@@ -267,7 +271,7 @@ module.exports = function(processingData, callback) {
         ],
         function(error, result) {
             if (error) {
-                ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
                 clearInterval(tickInterval);
                 ui.close();
                 callback(error);

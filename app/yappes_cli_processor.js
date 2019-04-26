@@ -64,6 +64,7 @@ YappesCliProcessor.prototype.loadCommand = function(command) {
         require.resolve(self.resolvePath + command);
         return require(self.resolvePath + command);
     } catch (e) {
+        console.log(e);
         return false;
     }
 
