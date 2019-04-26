@@ -26,13 +26,20 @@ module.exports = function(processingData, callback) {
     let pathYpSetting = "";
     let ypSettings = "";
     let businesslogicFile = "";
+    let envRunList = ['remote', 'local'];
     let hostObj = configs().getHostDetails();
     if (netrcObj.hasOwnProperty(hostObj.host)) {
         loginUser = netrcObj[hostObj.host].login;
     } else {
         callback("You are not logged in. Please login using the command 'yappescli login'");
     }
-    if (!processingData.run || processingData.run.toLowerCase() == 'local') {
+    if (!processingData.run) {
+        processingData.run = 'local';
+    }
+    if (envRunList.indexOf(processingData.run) < 0) {
+        return callback('wrong business Logic environment passed : remote and local are the available environment');
+    }
+    if (processingData.run.toLowerCase() == 'local') {
         async.waterfall([
                 function(callback) {
                     configs().getConfigSettings(function(err, data) {
@@ -227,7 +234,14 @@ module.exports = function(processingData, callback) {
             function(callback) {
                 fs.readFile(processingData.configFile, 'utf8', function(err, data) {
                     if (err) {
-                        callback(err);
+                        error_code = 3000;
+                        if (err.errno == -2) {
+                            callback(customErrorConfig().customError.ENOENT);
+                        } else if (err.code == 1) {
+                            callback(customErrorConfig().customError.EACCES);
+                        } else {
+                            callback(customErrorConfig().customError.EOPNOTSUPP);
+                        }
                     } else {
                         let yappesConfig = JSON.parse(data);
                         let environmentList = ['development', 'testing', 'production'];
