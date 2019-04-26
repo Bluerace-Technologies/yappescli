@@ -216,9 +216,6 @@ function createSettingsFile(apiHashDetails, workspace, callback) {
     let touchCmd = commandOptions['create-file'] + " " + path + settingFileName;
     nodeCmd.get(touchCmd, function(err, data) {
         if (err) {
-            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-            clearInterval(tickInterval);
-            ui.close();
             callback(err);
         } else {
             let settingsData = {
@@ -242,9 +239,6 @@ function createSettingsFile(apiHashDetails, workspace, callback) {
             }
             fs.writeFile(path + settingFileName, JSON.stringify(settingsData, null, 4), function(err) {
                 if (err) {
-                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                    clearInterval(tickInterval);
-                    ui.close();
                     callback(err);
                 } else {
                     callback(null);
@@ -261,9 +255,6 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
             let commandOptions = resolveOSCommands();
             fs.readFile(path + settingFileName, 'utf8', function(err, data) {
                 if (err) {
-                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                    clearInterval(tickInterval);
-                    ui.close();
                     callback(err);
                 } else {
                     let content = JSON.stringify(data);
@@ -309,9 +300,6 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
                 callback(null);
             }, function(err) {
                 if (err) {
-                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                    clearInterval(tickInterval);
-                    ui.close();
                     callback(err);
                 } else {
                     if (newApiClone) {
@@ -330,9 +318,6 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
         },
     ], function(err, result) {
         if (err) {
-            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-            clearInterval(tickInterval);
-            ui.close();
             callback(err);
         } else {
             callback(null);
@@ -343,9 +328,6 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
 function fetchWorkspacePath(path, callback) {
     fs.readFile(path, 'utf8', function(err, data) {
         if (err) {
-            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-            clearInterval(tickInterval);
-            ui.close();
             callback(err);
         } else {
             callback(null, data);
@@ -362,9 +344,6 @@ function createWsPath(path, callback) {
     let cmd = commandOptions['create-dir'] + " -p " + configPath;
     nodeCmd.get(cmd, function(err, data) {
         if (err) {
-            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-            clearInterval(tickInterval);
-            ui.close();
             callback(err);
         } else {
             fs.writeFile(path, JSON.stringify(workspacePath), function(err) {
@@ -387,17 +366,11 @@ function createYpClasses(workspace, apiHashDetails, callback) {
     let touchCmd = commandOptions['create-dir'] + ' -p ' + path + '/' + apiHashDetails.apiDetails.apiName + '/test';
     nodeCmd.get(touchCmd, function(err, data) {
         if (err) {
-            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-            clearInterval(tickInterval);
-            ui.close();
             callback(err);
         } else {
             async.waterfall([function(callback) {
                 fs.readFile(__dirname + '/../tests/reqresdata.js', 'UTF-8', function(err, data) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
                         let content = JSON.stringify(data);
@@ -408,9 +381,6 @@ function createYpClasses(workspace, apiHashDetails, callback) {
                 let reqResObject = fileData;
                 fs.writeFile(path + '/' + apiHashDetails.apiDetails.apiName + '/test/' + 'executestub.js', reqResObject, function(err) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
                         callback(null);
@@ -418,9 +388,6 @@ function createYpClasses(workspace, apiHashDetails, callback) {
                 });
             }], function(err) {
                 if (err) {
-                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                    clearInterval(tickInterval);
-                    ui.close();
                     callback(err);
                 } else {
                     callback(null);
