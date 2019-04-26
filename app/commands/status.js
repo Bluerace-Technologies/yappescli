@@ -7,18 +7,43 @@ let ypRequest = require('../utils/yp_request');
 const util = require('util');
 const async = require('async');
 const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
+const inquirer = require("inquirer");
+const chalk = require('chalk');
 
 module.exports = function(processingData, callback) {
     let apiDetails = { "apiName": processingData.apiName, "endpointDetails": [] };
     let path = "";
     let workspacePath = "";
     let workspaceFileJson = {};
+    let clock = [
+        "⠋",
+        "⠙",
+        "⠹",
+        "⠸",
+        "⠼",
+        "⠴",
+        "⠦",
+        "⠧",
+        "⠇",
+        "⠏"
+    ];
+
+    let counter = 0;
+    let ui = new inquirer.ui.BottomBar();
+
+    let tickInterval = setInterval(() => {
+        ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
+    }, 250);
     let netrcObj = netrc();
     let hostObj = configs().getHostDetails();
     if (netrcObj.hasOwnProperty(hostObj.host)) {
         loginUser = netrcObj[hostObj.host].login;
     } else {
-        return callback("You are not logged in. Please login using the command 'yappescli login'");
+        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+        clearInterval(tickInterval);
+        ui.close();
+        return callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
+
     }
     async.waterfall([
         function(callback) {
@@ -89,6 +114,7 @@ module.exports = function(processingData, callback) {
                     if (err) {
                         callback(err);
                     } else {
+                        ui.log.write(chalk.green('✓ Fetching remote details....'));
                         callback(null, apiDetails);
                     }
                 });
@@ -100,7 +126,10 @@ module.exports = function(processingData, callback) {
                     callback(err);
                 } else {
                     if (statusResponse.code == 200) {
-                        callback(null, statusResponse);
+                        setTimeout(function() {
+                            ui.log.write(chalk.green('✓ Checking for status ....'));
+                            callback(null, statusResponse);
+                        }, 1000);
                     } else {
                         callback(statusResponse.data.message);
                     }
@@ -140,6 +169,8 @@ module.exports = function(processingData, callback) {
         }
     ], function(err, res) {
         if (err) {
+            clearInterval(tickInterval);
+            ui.close();
             if (err.errno == -2) {
                 invalidName(workspacePath, function(err) {
                     callback(err);
@@ -148,7 +179,13 @@ module.exports = function(processingData, callback) {
                 callback(err);
             }
         } else {
-            callback(null, res);
+            setTimeout(function() {
+                clearInterval(tickInterval);
+                ui.updateBottomBar('');
+                ui.updateBottomBar(chalk.green('✓ status command execution completed \n'));
+                ui.close();
+                callback(null, res);
+            }, 1000);
         }
     });
 }

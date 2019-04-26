@@ -9,6 +9,8 @@ let { normalize, customMessage, invalidName } = require('../utils/yp_normalize')
 let path = require("path");
 let settingFileName = ".ypsettings.json";
 const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
+const inquirer = require("inquirer");
+const chalk = require('chalk');
 
 module.exports = function(processingData, callback) {
     let commandOptions = resolveOSCommands();
@@ -17,11 +19,33 @@ module.exports = function(processingData, callback) {
     let apiHashDetails = {};
     let configFileExists = false;
     let workspace = "";
+    let clock = [
+        "⠋",
+        "⠙",
+        "⠹",
+        "⠸",
+        "⠼",
+        "⠴",
+        "⠦",
+        "⠧",
+        "⠇",
+        "⠏"
+    ];
+
+    let counter = 0;
+    let ui = new inquirer.ui.BottomBar();
+
+    let tickInterval = setInterval(() => {
+        ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
+    }, 250);
     let hostObj = configs().getHostDetails();
     if (netrcObj.hasOwnProperty(hostObj.host)) {
         loginUser = netrcObj[hostObj.host].login;
     } else {
-        return callback("You are not logged in. Please login using the command 'yappescli login'");
+        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+        clearInterval(tickInterval);
+        ui.close();
+        return callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
     }
     async.waterfall([
         function(callback) {
@@ -62,6 +86,7 @@ module.exports = function(processingData, callback) {
                     callback(err);
                 } else {
                     if (apiResponse.code == 200) {
+                        ui.log.write(chalk.green('✓ Fetching remote details....'));
                         apiHashDetails = apiResponse.data;
                         callback(null, apiResponse);
                     } else {
@@ -106,7 +131,11 @@ module.exports = function(processingData, callback) {
                             if (err) {
                                 callback(err);
                             } else {
-                                callback(null, customMessagesConfig().customMessages.CLSUCCESS.message +" "+ processingData.apiIdentifier);
+                                setTimeout(function() {
+                                    ui.log.write(chalk.green('✓ Summoning Files ....'));
+                                    callback(null, customMessagesConfig().customMessages.CLSUCCESS.message + " " + processingData.apiIdentifier);
+                                }, 1000);
+
                             }
                         });
                 }
@@ -118,7 +147,11 @@ module.exports = function(processingData, callback) {
                     if (err) {
                         callback(err);
                     } else {
-                        callback(null, res);
+                        setTimeout(function() {
+                            ui.log.write(chalk.green('✓ Creating Settings file  ....'));
+                            callback(null, res);
+                        }, 1000);
+
                     }
                 });
             } else {
@@ -126,7 +159,10 @@ module.exports = function(processingData, callback) {
                     if (err) {
                         callback(err);
                     } else {
-                        callback(null, res);
+                        setTimeout(function() {
+                            ui.log.write(chalk.green('✓ Updating Settings Files ....'));
+                            callback(null, res);
+                        }, 1000);
                     }
                 });
             }
@@ -152,6 +188,8 @@ module.exports = function(processingData, callback) {
         }
     ], function(err, res) {
         if (err) {
+            clearInterval(tickInterval);
+            ui.close();
             error_code = 3000;
             if (err.errno == -2) {
                 callback(customMessage(customErrorConfig().customError.ELIBBAD));
@@ -161,9 +199,14 @@ module.exports = function(processingData, callback) {
                 callback(customMessage(customErrorConfig().customError.APNAMEERR));
             }
         } else {
-            callback(null, res);
+            setTimeout(function() {
+                clearInterval(tickInterval);
+                ui.updateBottomBar('');
+                ui.updateBottomBar(chalk.green('✓ Clone command execution completed \n'));
+                ui.close();
+                callback(null, res);
+            }, 1000);
         }
-
     });
 }
 
@@ -173,6 +216,9 @@ function createSettingsFile(apiHashDetails, workspace, callback) {
     let touchCmd = commandOptions['create-file'] + " " + path + settingFileName;
     nodeCmd.get(touchCmd, function(err, data) {
         if (err) {
+            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+            clearInterval(tickInterval);
+            ui.close();
             callback(err);
         } else {
             let settingsData = {
@@ -196,6 +242,9 @@ function createSettingsFile(apiHashDetails, workspace, callback) {
             }
             fs.writeFile(path + settingFileName, JSON.stringify(settingsData, null, 4), function(err) {
                 if (err) {
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                    clearInterval(tickInterval);
+                    ui.close();
                     callback(err);
                 } else {
                     callback(null);
@@ -211,7 +260,12 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
         function(callback) {
             let commandOptions = resolveOSCommands();
             fs.readFile(path + settingFileName, 'utf8', function(err, data) {
-                if (err) { callback(err); } else {
+                if (err) {
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                    clearInterval(tickInterval);
+                    ui.close();
+                    callback(err);
+                } else {
                     let content = JSON.stringify(data);
                     data = JSON.parse(JSON.parse(content));
                     callback(null, data);
@@ -254,7 +308,12 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
                 epIndex++;
                 callback(null);
             }, function(err) {
-                if (err) { callback(err); } else {
+                if (err) {
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                    clearInterval(tickInterval);
+                    ui.close();
+                    callback(err);
+                } else {
                     if (newApiClone) {
                         fileData.apiReferences.push(settingsData.apiReferences);
                     }
@@ -271,6 +330,9 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
         },
     ], function(err, result) {
         if (err) {
+            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+            clearInterval(tickInterval);
+            ui.close();
             callback(err);
         } else {
             callback(null);
@@ -280,7 +342,12 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
 
 function fetchWorkspacePath(path, callback) {
     fs.readFile(path, 'utf8', function(err, data) {
-        if (err) { callback(err); } else {
+        if (err) {
+            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+            clearInterval(tickInterval);
+            ui.close();
+            callback(err);
+        } else {
             callback(null, data);
         }
     });
@@ -295,6 +362,9 @@ function createWsPath(path, callback) {
     let cmd = commandOptions['create-dir'] + " -p " + configPath;
     nodeCmd.get(cmd, function(err, data) {
         if (err) {
+            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+            clearInterval(tickInterval);
+            ui.close();
             callback(err);
         } else {
             fs.writeFile(path, JSON.stringify(workspacePath), function(err) {
@@ -317,11 +387,17 @@ function createYpClasses(workspace, apiHashDetails, callback) {
     let touchCmd = commandOptions['create-dir'] + ' -p ' + path + '/' + apiHashDetails.apiDetails.apiName + '/test';
     nodeCmd.get(touchCmd, function(err, data) {
         if (err) {
+            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+            clearInterval(tickInterval);
+            ui.close();
             callback(err);
         } else {
             async.waterfall([function(callback) {
                 fs.readFile(__dirname + '/../tests/reqresdata.js', 'UTF-8', function(err, data) {
                     if (err) {
+                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                        clearInterval(tickInterval);
+                        ui.close();
                         callback(err);
                     } else {
                         let content = JSON.stringify(data);
@@ -332,6 +408,9 @@ function createYpClasses(workspace, apiHashDetails, callback) {
                 let reqResObject = fileData;
                 fs.writeFile(path + '/' + apiHashDetails.apiDetails.apiName + '/test/' + 'executestub.js', reqResObject, function(err) {
                     if (err) {
+                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                        clearInterval(tickInterval);
+                        ui.close();
                         callback(err);
                     } else {
                         callback(null);
@@ -339,6 +418,9 @@ function createYpClasses(workspace, apiHashDetails, callback) {
                 });
             }], function(err) {
                 if (err) {
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                    clearInterval(tickInterval);
+                    ui.close();
                     callback(err);
                 } else {
                     callback(null);

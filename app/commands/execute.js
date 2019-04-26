@@ -52,7 +52,11 @@ module.exports = function(processingData, callback) {
     if (netrcObj.hasOwnProperty(hostObj.host)) {
         loginUser = netrcObj[hostObj.host].login;
     } else {
-        return callback("You are not logged in. Please login using the command 'yappescli login'");
+        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+        clearInterval(tickInterval);
+        ui.close();
+        return callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
+
     }
     if (!processingData.run) {
         processingData.run = 'local';
@@ -65,9 +69,6 @@ module.exports = function(processingData, callback) {
                 function(callback) {
                     configs().getConfigSettings(function(err, data) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(err);
                         } else {
                             workspacePath = JSON.parse(data).path;
@@ -82,17 +83,12 @@ module.exports = function(processingData, callback) {
                 function(callback) {
                     fs.readFile(businesslogicFile, 'utf8', function(err, data) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(customMessage(customErrorConfig().customError.APIEPERR));
                         } else {
                             businessLogic = data;
                             executeLogic.businessLogic = data;
-                            setTimeout(function() {
-                                ui.log.write(chalk.green('✓ Fetching the code ...'));
-                                callback(null, executeLogic)
-                            }, 1000);
+                            ui.log.write(chalk.green('✓ Fetching the code ...'));
+                            callback(null, executeLogic);
                         }
                     });
                 },
@@ -100,9 +96,6 @@ module.exports = function(processingData, callback) {
                     let errorCondition = false;
                     fs.readFile(pathYpSetting, 'utf8', function(err, data) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(customMessage(customErrorConfig().customError.ENOENT));
                         } else {
                             ypSettings = JSON.parse(data);
@@ -123,9 +116,6 @@ module.exports = function(processingData, callback) {
                             }
                             if (errorCondition) {
                                 invalidName(workspacePath, function(err) {
-                                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                                    clearInterval(tickInterval);
-                                    ui.close();
                                     callback(err);
                                 });
                             } else {
@@ -150,9 +140,6 @@ module.exports = function(processingData, callback) {
                             process.env.ypcontext = JSON.stringify({ ypsettings: context, apiHash: apiHash });
                             nodeCmd.get(cmd, function(err, nodeModulePath) {
                                 if (err) {
-                                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                                    clearInterval(tickInterval);
-                                    ui.close();
                                     callback(customMessage(customErrorConfig().customError.EOPNOTSUPP));
                                 } else {
                                     callback(null, nodeModulePath.trim());
@@ -164,9 +151,6 @@ module.exports = function(processingData, callback) {
                             remoteSetArray = remoteSetArray.ypsettings;
                             fs.readFile(__dirname + '/../template/logic_template.js', 'UTF-8', function(err, logicTemplateScript) {
                                 if (err) {
-                                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                                    clearInterval(tickInterval);
-                                    ui.close();
                                     callback(err);
                                 } else {
                                     logic = logicTemplateScript.replace("logicTemplate", executeLogic.businessLogic);
@@ -223,9 +207,6 @@ module.exports = function(processingData, callback) {
                             let tempFile = apiNamePath + '/temp.js';
                             fs.writeFile(tempFile, logic, function(err) {
                                 if (err) {
-                                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                                    clearInterval(tickInterval);
-                                    ui.close();
                                     callback(customMessage(customErrorConfig().customError.EOPNOTSUPP));
                                 } else {
                                     callback(null, tempFile);
@@ -237,9 +218,6 @@ module.exports = function(processingData, callback) {
                             let cmd = 'node ' + file;
                             nodeCmd.get(cmd, function(err, data) {
                                 if (err) {
-                                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                                    clearInterval(tickInterval);
-                                    ui.close();
                                     callback(customMessage(customErrorConfig().customError.EOPNOTSUPP));
                                 } else {
                                     setTimeout(function() {
@@ -253,9 +231,6 @@ module.exports = function(processingData, callback) {
                             delete process.env.ypcontext;
                             fs.unlink(file, function(err) {
                                 if (err) {
-                                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                                    clearInterval(tickInterval);
-                                    ui.close();
                                     callback(customMessage(customErrorConfig().customError.EOPNOTSUPP));
                                 } else {
                                     callback(null, response);
@@ -264,9 +239,6 @@ module.exports = function(processingData, callback) {
                         }
                     ], function(err, result) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(err);
                         } else {
                             callback(null, result);
@@ -281,9 +253,9 @@ module.exports = function(processingData, callback) {
                     setTimeout(function() {
                         clearInterval(tickInterval);
                         ui.updateBottomBar('');
-                        callback(null, result);
-                        ui.updateBottomBar(chalk.green('✓ Execute command completed'));
+                        ui.updateBottomBar(chalk.green('✓ Execute command completed\n'));
                         ui.close();
+                        callback(null, result);
                     }, 1000);
                 }
             }
@@ -293,9 +265,6 @@ module.exports = function(processingData, callback) {
             function(callback) {
                 fs.readFile(processingData.configFile, 'utf8', function(err, data) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         error_code = 3000;
                         if (err.errno == -2) {
                             callback(customMessage(customErrorConfig().customError.ENOENT));
@@ -319,9 +288,6 @@ module.exports = function(processingData, callback) {
                             processingData.pathParameters = yappesConfig.pathParameters;
                             callback(null);
                         } else {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(customMessage(customErrorConfig().customError.ENVERR));
                         }
                     }
@@ -330,15 +296,9 @@ module.exports = function(processingData, callback) {
             function(callback) {
                 status(processingData, function(err, response) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
-                        setTimeout(function() {
-                            ui.log.write(chalk.green('✓ Checking the status of code '));
-                            callback(null, response.statusResponse);
-                        }, 1000);
+                        callback(null, response.statusResponse);
                     }
                 });
             },
@@ -359,17 +319,11 @@ module.exports = function(processingData, callback) {
                 });
                 if (epExist) {
                     if (localAhead) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(customMessage(customErrorConfig().customError.CDAHEAD));
                     } else {
                         callback(null);
                     }
                 } else {
-                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                    clearInterval(tickInterval);
-                    ui.close();
                     callback(customMessage(customErrorConfig().customError.EPNAMEERR));
                 }
 
@@ -377,9 +331,6 @@ module.exports = function(processingData, callback) {
             function(callback) {
                 configs().getConfigSettings(function(err, data) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
                         let pathYpSetting = JSON.parse(data).path + '.ypsettings.json';
@@ -391,9 +342,6 @@ module.exports = function(processingData, callback) {
                 fs.readFile(pathYpSetting, 'utf8', function(err, data) {
                     if (err) {
                         error_code = 3000;
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         if (err.errno == -2) {
                             callback(customMessage(customErrorConfig().customError.ENOENT));
                         } else if (err.code == 1) {
@@ -446,12 +394,13 @@ module.exports = function(processingData, callback) {
                             }
                         });
                     if (keyCount == tempArr.length) {
-                        callback(null, yappesEndpointConfig);
-                    } else {
                         setTimeout(function() {
                             ui.log.write(chalk.green('✓ passing the parameters'));
-                            callback(customMessage(customErrorConfig().customError.PATHPRERR));
+                            callback(null, yappesEndpointConfig);
                         }, 1000);
+                    } else {
+                        callback(customMessage(customErrorConfig().customError.PATHPRERR));
+
                     }
                 } else {
                     setTimeout(function() {
@@ -472,30 +421,28 @@ module.exports = function(processingData, callback) {
                 };
                 runLogic(yappesUrl, parameters, processingData.yappesKey, function(err, response) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
                         setTimeout(function() {
-                            ui.log.write(chalk.green('✓ Running the Remote Code'));
-                            callback(response);
+                            ui.log.write(chalk.green('✓ Remote Code Running'));
+                            callback(null, response);
                         }, 1000);
                     }
                 });
             }
         ], function(err, response) {
             if (err) {
+                clearInterval(tickInterval);
+                ui.close();
                 callback(err);
             } else {
                 setTimeout(function() {
                     clearInterval(tickInterval);
                     ui.updateBottomBar('');
-                    callback(null, response);
-                    ui.updateBottomBar(chalk.green('✓ Executr command completed'));
+                    ui.updateBottomBar(chalk.green('✓ Execute command completed\n'));
                     ui.close();
+                    callback(null, response);
                 }, 1000);
-
             }
         });
     }
@@ -559,9 +506,6 @@ function runLogic(apiUrl, parameters, yappesKey, callback) {
     });
     requestObj.write(JSON.stringify(parameters.payload));
     requestObj.on('error', function(err) {
-        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-        clearInterval(tickInterval);
-        ui.close();
         callback(err);
     });
 
