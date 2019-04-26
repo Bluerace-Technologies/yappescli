@@ -49,7 +49,7 @@ module.exports = function(processingData, callback){
                 ui.updateBottomBar('');
                 ui.updateBottomBar(chalk.green('✓ Login Required. \n'));
                 ui.close();         
-                callback("You are not logged in. Please login using the command 'yappescli login'");
+                callback(customErrorConfig().customError.VALIDATION_ERROR_LOGIN);
             },1000)
     }
 }

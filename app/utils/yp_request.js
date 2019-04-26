@@ -1,6 +1,7 @@
 const request = require('request');
 const netrc = require('netrc');
 const {configs} = require('../configs/yp_configs');
+const { customErrorConfig,customMessagesConfig } = require('../configs/yp_custom_error');
 
 exports.call = function(endPointPath, operation, data, callback) {
     let self = this;
@@ -20,7 +21,7 @@ exports.call = function(endPointPath, operation, data, callback) {
     if(netrcObj.hasOwnProperty(hostObj.host)){
             reqOptions['headers']['X-YPCLI-TOKEN'] = netrcObj[hostObj.host].password;
     } else {
-            return callback("You are not logged in. Please login using the command 'yappescli login'");
+            return callback(customErrorConfig().customError.VALIDATION_ERROR_LOGIN);
     } 
 
     if (operation == "post") {

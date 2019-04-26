@@ -61,9 +61,18 @@ exports.customErrorConfig = function() {
                 errorCode: 3500,
                 errorMessage: ""
             },
-
-
-
+            'INVALID_ENDPOINTNAME':{
+                errorCode: 3400,
+                errorMessage: "Provided Endpoint name is not valid."
+            },
+            'VALIDATION_ERROR_LOGIN':{
+                errorCode: 3400,
+                errorMessage: "You are not logged in. Please login using the command 'yappescli login'"  
+            },
+            'VALIDATION_ENDPOINT_REQUIRED':{
+                errorCode: 3400,
+                errorMessage: "Deploy command works only at the endpoint level.Please provide the Endpoint name."  
+            }            
         }
     }
 }
@@ -71,6 +80,22 @@ exports.customErrorConfig = function() {
 exports.customMessagesConfig = function() {
     return {
         customMessages: {
+            'DEPLOY_SUCCESS': {
+                code : 3200,
+                message: "Successfully Deployed the local code to remote."
+            },
+            'PULL_INSYNC':{
+                code : 3200,
+                message: " Local and Remote are already in-sync. \n"
+            },
+            'PULL_BEHIND':{
+                code : 3200,
+                message: " Remote code was ahead of your Local code repo. Syncing is done. Now both the Local and Remote repo are in-sync. \n"
+            },
+            'PULL_FORWARD':{
+                code : 3200,
+                message: " Local is having the latest Code. Once you have done with your update use 'yappescli deploy' command to push it to Remote. \n"
+            },
             'CLSUCCESS': {
                 code: 3200,
                 message: "Successfully Cloned the API "
@@ -86,12 +111,14 @@ exports.customMessagesConfig = function() {
         }
     }
 }
+
 /*YAPPES CUSTOME MESSAGE SPEC 
 31xx > Series
 Validation Errors : 3400
 Logic Error : 3500
 Proper Response : 3200
 */
+
 /* LINUX err REF
 EPERM 1 Operation not permitted
 ENOENT 2 No such file or directory
