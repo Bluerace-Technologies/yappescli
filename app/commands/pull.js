@@ -62,9 +62,6 @@ module.exports = function(processingData, callback) {
                 if (processingData.endPointName == undefined) {
                     configs().getConfigSettings(function(err, data) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(err);
                         } else {
                             workspacePath = JSON.parse(data).path;
@@ -77,9 +74,6 @@ module.exports = function(processingData, callback) {
                 } else {
                     configs().getConfigSettings(function(err, data) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(err);
                         } else {
                             workspacePath = JSON.parse(data).path;
@@ -96,9 +90,6 @@ module.exports = function(processingData, callback) {
                 if (processingData.endPointName == undefined) {
                     fs.readdir(pathEndPoint, function(err, files) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             invalidName(workspacePath,function(error){
                                 callback(error);
                             });
@@ -113,9 +104,6 @@ module.exports = function(processingData, callback) {
                 } else {
                     fs.stat(endPointFile, function(err, stats) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(customMessage(customErrorConfig().customError.APIEPERR.errorMessage)); 
                         } else {
                             let mtime = new Date(util.inspect(stats.mtime));
@@ -200,9 +188,6 @@ module.exports = function(processingData, callback) {
                 let endPointPath = "/cli/endpoint/pull/"
                 ypRequest.call(endPointPath, "post", cliPullData, function(err, statusResponse) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
                         setTimeout(function() {
@@ -271,7 +256,6 @@ module.exports = function(processingData, callback) {
         ],
         function(error, result) {
             if (error) {
-                ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
                 clearInterval(tickInterval);
                 ui.close();
                 callback(error);

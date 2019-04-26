@@ -61,9 +61,6 @@ module.exports = function(processingData, callback) {
                 if(processingData.endPointName!=undefined){ 
                     configs().getConfigSettings(function(err, data) {
                         if (err) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(err);
                         } else {
                             pathEndPoint = JSON.parse(data).path + normalize(processingData.apiName) + "/endpoints/";
@@ -74,18 +71,12 @@ module.exports = function(processingData, callback) {
                         }
                     });
                 }else {
-                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                    clearInterval(tickInterval);
-                    ui.close();
                     callback(customMessage(customErrorConfig().customError.VALIDATION_ENDPOINT_REQUIRED));
                 }
             },
             function(callback) {
                 fs.stat(businesslogicFile, function(err, stats) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(customMessage(customErrorConfig().customError.APIEPERR));
                     } else {
                         let mtime = new Date(util.inspect(stats.mtime));
@@ -98,9 +89,6 @@ module.exports = function(processingData, callback) {
                 fs.readFile(businesslogicFile, 'utf8', function(err, data) {
                     if (err) {
                         error_code = 3000;
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                            clearInterval(tickInterval);
-                            ui.close();
                         if (err.errno == -2) {    
                             callback(customMessage(customErrorConfig().customError.ENOENT));
                         } else if (err.code == 1) {
@@ -122,9 +110,6 @@ module.exports = function(processingData, callback) {
                 let errorCondition = false;
                 fs.readFile(pathYpSetting, 'utf8', function(err, data) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
                         ypSettings = JSON.parse(data);
@@ -144,9 +129,6 @@ module.exports = function(processingData, callback) {
                             }
                         }
                         if (errorCondition) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(customMessage(customErrorConfig().customError.INVALID_ENDPOINTNAME.errorMessage));
                         } else {
                             setTimeout(function() {
@@ -161,9 +143,6 @@ module.exports = function(processingData, callback) {
                 let endPointPath = "/cli/resource/businesslogic/" + processingData.apiName;
                 ypRequest.call(endPointPath, "put", updateBusinessLogicData, function(err, statusResponse) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
                         if (statusResponse.code == 200) {
@@ -172,9 +151,6 @@ module.exports = function(processingData, callback) {
                                 callback(null, statusResponse);
                             }, 1000);
                         } else {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(statusResponse.data.message);
                         }
                     }
@@ -183,6 +159,8 @@ module.exports = function(processingData, callback) {
         ],
         function(error, result) {
             if (error) {
+                clearInterval(tickInterval);
+                ui.close();
                 callback(error);
             } else {
                 setTimeout(function() {
