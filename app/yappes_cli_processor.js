@@ -64,7 +64,6 @@ YappesCliProcessor.prototype.loadCommand = function(command) {
         require.resolve(self.resolvePath + command);
         return require(self.resolvePath + command);
     } catch (e) {
-        console.log(e);
         return false;
     }
 
@@ -128,6 +127,7 @@ YappesCliProcessor.prototype.executeCommand = function(command, inputData, callb
         } catch (err) {
             let error = customErrorConfig().customError.RUNTIMEERR;
             error.errorMessage = err;
+            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
             clearInterval(tickInterval);
             ui.close();
             callback(customMessage(error));
@@ -140,6 +140,7 @@ YappesCliProcessor.prototype.executeCommand = function(command, inputData, callb
             "errorMessage": 'Invalid Command'
         };
         errorLogger.error(logObject);
+        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
         clearInterval(tickInterval);
         ui.close();
         callback('Invalid Command');
