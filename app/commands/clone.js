@@ -5,10 +5,10 @@ let { resolveOSCommands } = require('../utils/yp_resolve_os');
 var async = require('async');
 const netrc = require('netrc');
 const nodeCmd = require('node-cmd');
-let { normalize } = require('../utils/yp_normalize');
+let { normalize, customMessage, invalidName } = require('../utils/yp_normalize');
 let path = require("path");
 let settingFileName = ".ypsettings.json";
-const { customErrorConfig } = require('../configs/yp_custom_error');
+const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
 
 module.exports = function(processingData, callback) {
     let commandOptions = resolveOSCommands();
@@ -21,7 +21,7 @@ module.exports = function(processingData, callback) {
     if (netrcObj.hasOwnProperty(hostObj.host)) {
         loginUser = netrcObj[hostObj.host].login;
     } else {
-        callback("You are not logged in. Please login using the command 'yappescli login'");
+        return callback("You are not logged in. Please login using the command 'yappescli login'");
     }
     async.waterfall([
         function(callback) {
@@ -106,7 +106,7 @@ module.exports = function(processingData, callback) {
                             if (err) {
                                 callback(err);
                             } else {
-                                callback(null, "Successfully Cloned the API " + processingData.apiIdentifier);
+                                callback(null, customMessagesConfig().customMessages.CLSUCCESS.message +" "+ processingData.apiIdentifier);
                             }
                         });
                 }
@@ -139,13 +139,14 @@ module.exports = function(processingData, callback) {
                     callback(null, result);
                 }
             });
-        },function(result,callback){
-            let configFilePath=workspace + '/' + apiHashDetails.apiDetails.apiName + '/test/runtime_config.json';
-            createRuntimeConfig(apiHashDetails,configFilePath,function(err){
+        },
+        function(result, callback) {
+            let configFilePath = workspace + '/' + apiHashDetails.apiDetails.apiName + '/test/runtime_config.json';
+            createRuntimeConfig(apiHashDetails, configFilePath, function(err) {
                 if (err) {
                     callback(err);
-                }else{
-                    callback(null,result);
+                } else {
+                    callback(null, result);
                 }
             });
         }
@@ -153,11 +154,11 @@ module.exports = function(processingData, callback) {
         if (err) {
             error_code = 3000;
             if (err.errno == -2) {
-                callback(customErrorConfig().customError.ELIBBAD);
+                callback(customMessage(customErrorConfig().customError.ELIBBAD));
             } else if (err.code == 1) {
-                callback(customErrorConfig().customError.EACCES);
+                callback(customMessage(customErrorConfig().customError.EACCES));
             } else {
-                callback(customErrorConfig().customError.EOPNOTSUPP);
+                callback(customMessage(customErrorConfig().customError.APNAMEERR));
             }
         } else {
             callback(null, res);
@@ -189,7 +190,7 @@ function createSettingsFile(apiHashDetails, workspace, callback) {
                     endpointName: apiHashDetails.endpointDetails[i].endPointName,
                     hash: apiHashDetails.endpointDetails[i].hash,
                     endPoint: apiHashDetails.endpointDetails[i].endPoint,
-                    method:apiHashDetails.endpointDetails[i].method
+                    method: apiHashDetails.endpointDetails[i].method
                 };
                 settingsData.apiReferences[0].endPointReferences.push(endPointTempVar);
             }
@@ -235,7 +236,7 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
                     endpointName: apiHashDetails.endpointDetails[i].endPointName,
                     hash: apiHashDetails.endpointDetails[i].hash,
                     endPoint: apiHashDetails.endpointDetails[i].endPoint,
-                    method:apiHashDetails.endpointDetails[i].method
+                    method: apiHashDetails.endpointDetails[i].method
                 };
                 settingsData.apiReferences.endPointReferences.push(endPointTempVar);
             }
@@ -356,7 +357,7 @@ function createRuntimeConfig(apiHashDetails, path, callback) {
         yappesEnvironment: "",
         yappesKey: ""
     };
-   fs.writeFile(path, JSON.stringify(environmentDetails, null, 4), function(err) {
+    fs.writeFile(path, JSON.stringify(environmentDetails, null, 4), function(err) {
         if (err) {
             callback(err)
         } else {

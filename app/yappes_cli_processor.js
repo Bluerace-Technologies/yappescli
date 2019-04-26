@@ -1,4 +1,6 @@
 const { createLogger, format, transports } = require('winston');
+const { customErrorConfig, customMessagesConfig } = require('./configs/yp_custom_error');
+let { customMessage, invalidName } = require('./utils/yp_normalize');
 require('winston-daily-rotate-file');
 const fs = require('fs');
 const path = require('path');
@@ -75,26 +77,32 @@ YappesCliProcessor.prototype.executeCommand = function(command, inputData, callb
         } else {
             inputData["endPointPath"] = "not-required";
         }
-        commandModule(inputData, function(err, apiResults) {
-            if (err) {
-                let logObject = {
-                    "command": command,
-                    "inputData": inputData,
-                    "status": "error",
-                    "errorMessage": err
-                };
-                errorLogger.error(logObject);
-                callback(err);
-            } else {
-                let logObject = {
-                    "command": command,
-                    "inputData": inputData,
-                    "status": "success"
-                };
-                accessLogger.info(logObject);
-                callback(null, apiResults);
-            }
-        });
+        try {
+            commandModule(inputData, function(err, apiResults) {
+                if (err) {
+                    let logObject = {
+                        "command": command,
+                        "inputData": inputData,
+                        "status": "error",
+                        "errorMessage": err
+                    };
+                    errorLogger.error(logObject);
+                    callback(err);
+                } else {
+                    let logObject = {
+                        "command": command,
+                        "inputData": inputData,
+                        "status": "success"
+                    };
+                    accessLogger.info(logObject);
+                    callback(null, apiResults);
+                }
+            });
+        } catch (err) {
+            let error=customErrorConfig().customError.RUNTIMEERR;
+            error.errorMessage=err;
+            callback(customMessage(error));
+        }
     } else {
         let logObject = {
             "command": command,
