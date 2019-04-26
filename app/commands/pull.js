@@ -6,7 +6,7 @@ let ypRequest = require('../utils/yp_request');
 let { normalize } = require('../utils/yp_normalize');
 const util = require('util');
 const async = require('async');
-const { customErrorConfig } = require('../configs/yp_custom_error');
+const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
 const inquirer = require("inquirer");
 const chalk = require('chalk');
 
@@ -41,7 +41,23 @@ module.exports = function(processingData, callback) {
       ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
     }, 250);
 
+    let netrcObj = netrc();
+    let loginUser = "";
+
     async.waterfall([
+            function(callback) {
+                let hostObj = configs().getHostDetails();
+                if (netrcObj.hasOwnProperty(hostObj.host)) {
+                    loginUser = netrcObj[hostObj.host].login;
+                    callback(null);
+                } else {
+                    // callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                    clearInterval(tickInterval);
+                    ui.close();
+                    callback(customErrorConfig().customError.VALIDATION_ERROR_LOGIN);
+                }
+            },
             function(callback) {
                 if (processingData.endPointName == undefined) {
                     configs().getConfigSettings(function(err, data) {
@@ -81,7 +97,7 @@ module.exports = function(processingData, callback) {
                             ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
                             clearInterval(tickInterval);
                             ui.close();
-                            callback(err);
+                            callback(customErrorConfig().customError.INVALID_APINAME.errorMessage); // change
                         } else {
                             endPointsBulkArray = files;
                             setTimeout(function() {
@@ -96,7 +112,7 @@ module.exports = function(processingData, callback) {
                             ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
                             clearInterval(tickInterval);
                             ui.close();
-                            callback(err);
+                            callback(customErrorConfig().customError.INVALID_APINAME.errorMessage); // change
                         } else {
                             let mtime = new Date(util.inspect(stats.mtime));
                             cliPullData.apiName = processingData.apiName;
@@ -168,7 +184,7 @@ module.exports = function(processingData, callback) {
                                 }
                             }
                             if (errorCondition) {
-                                callback('Wrong Endpoint Details');
+                                callback(customErrorConfig().customError.INVALID_ENDPOINTNAME.errorMessage);
                             } else {
                                 callback(null, cliPullData);
                             }
@@ -220,7 +236,7 @@ module.exports = function(processingData, callback) {
                         return epIndex < responseDataPull.data.endpointPullList.length;
                     }, function(callback) {
                         if (responseDataPull.data.endpointPullList[epIndex].remoteSync == 'yes') {
-                            syncResponse += "'" + responseDataPull.data.endpointPullList[epIndex].endpointName + "'" + " Remote code was ahead of your Local code repo. Syncing is done. Now both the Local and Remote repo are in-sync. \n";
+                            syncResponse += "'" + responseDataPull.data.endpointPullList[epIndex].endpointName + "'" + customMessagesConfig().customMessages.PULL_BEHIND.message;
                             path = pathEndPoint + normalize(responseDataPull.data.endpointPullList[epIndex].endpointName) + '.js';
                             writeFile(path, decodeURI(responseDataPull.data.endpointPullList[epIndex].businesslogic), new Date(responseDataPull.data.endpointPullList[epIndex].remoteModifiedDateTime), function(err) {
                                 if (err) {
@@ -231,11 +247,11 @@ module.exports = function(processingData, callback) {
                                 }
                             });
                         } else if (responseDataPull.data.endpointPullList[epIndex].remoteSync == 'no') {
-                            syncResponse += "'" + responseDataPull.data.endpointPullList[epIndex].endpointName + "'" + " Local is having the latest Code. Once you have done with your update use 'yappescli deploy' command to push it to Remote. \n";
+                            syncResponse += "'" + responseDataPull.data.endpointPullList[epIndex].endpointName + "'" + customMessagesConfig().customMessages.PULL_FORWARD.message;
                             epIndex++;
                             callback(null);
                         } else if (responseDataPull.data.endpointPullList[epIndex].remoteSync == 'in-sync') {
-                            syncResponse += "'" + responseDataPull.data.endpointPullList[epIndex].endpointName + "'" + " Local and Remote are already in-sync. \n";
+                            syncResponse += "'" + responseDataPull.data.endpointPullList[epIndex].endpointName + "'" + customMessagesConfig().customMessages.PULL_INSYNC.message;
                             epIndex++;
                             callback(null);
                         }

@@ -6,7 +6,7 @@ let ypRequest = require('../utils/yp_request');
 let { normalize } = require('../utils/yp_normalize');
 const util = require('util');
 const async = require('async');
-const { customErrorConfig } = require('../configs/yp_custom_error');
+const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
 const inquirer = require("inquirer");
 const chalk = require('chalk');
 
@@ -41,32 +41,53 @@ module.exports = function(processingData, callback) {
     let tickInterval = setInterval(() => {
         ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
     }, 250);
-
+    let netrcObj = netrc();
+    let loginUser = "";
 
     async.waterfall([
             function(callback) {
-                configs().getConfigSettings(function(err, data) {
-                    if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
-                        callback(err);
-                    } else {
-                        pathEndPoint = JSON.parse(data).path + normalize(processingData.apiName) + "/endpoints/";
-                        pathYpSetting = JSON.parse(data).path + '.ypsettings.json';
-                        businesslogicFile = pathEndPoint + normalize(processingData.endPointName) + ".js";
-                        ui.log.write(chalk.green('✓ Execution starts....'));
-                        callback(null);
-                    }
-                });
+                let hostObj=configs().getHostDetails();
+                if (netrcObj.hasOwnProperty(hostObj.host)) {
+                    loginUser = netrcObj[hostObj.host].login;
+                    callback(null);
+                } else {
+                    // callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                    clearInterval(tickInterval);
+                    ui.close();
+                    callback(customErrorConfig().customError.VALIDATION_ERROR_LOGIN);
+                }
+            },
+            function(callback) {
+                if(processingData.endPointName!=undefined){ 
+                    configs().getConfigSettings(function(err, data) {
+                        if (err) {
+                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                            clearInterval(tickInterval);
+                            ui.close();
+                            callback(err);
+                        } else {
+                            pathEndPoint = JSON.parse(data).path + normalize(processingData.apiName) + "/endpoints/";
+                            pathYpSetting = JSON.parse(data).path + '.ypsettings.json';
+                            businesslogicFile = pathEndPoint + normalize(processingData.endPointName) + ".js";
+                            ui.log.write(chalk.green('✓ Execution starts....'));
+                            callback(null);
+                        }
+                    });
+                }else {
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                    clearInterval(tickInterval);
+                    ui.close();
+                    callback(customErrorConfig().customError.VALIDATION_ENDPOINT_REQUIRED);
+                }
             },
             function(callback) {
                 fs.stat(businesslogicFile, function(err, stats) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
                         clearInterval(tickInterval);
                         ui.close();
-                        callback(err);
+                        callback(customErrorConfig().customError.INVALID_ENDPOINTNAME);
                     } else {
                         let mtime = new Date(util.inspect(stats.mtime));
                         updateBusinessLogicData.lastModifiedDateTime = mtime;
@@ -127,7 +148,7 @@ module.exports = function(processingData, callback) {
                             ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
                             clearInterval(tickInterval);
                             ui.close();
-                            callback(apiNameError);
+                            callback(customErrorConfig().customError.INVALID_APINAME_OR_ENDPOINTNAME.errorMessage); /// customErrorConfig().customError.INVALID-APINAME
                         } else {
                             setTimeout(function() {
                                 ui.log.write(chalk.green('✓ Getting the latest code from local...'));
@@ -168,7 +189,7 @@ module.exports = function(processingData, callback) {
                 setTimeout(function() {
                     clearInterval(tickInterval);
                     ui.updateBottomBar('');
-                    callback(null, result.data.message);
+                    callback(null, customMessagesConfig().customMessages.DEPLOY_SUCCESS.message);
                     ui.updateBottomBar(chalk.green('✓ Deploy command execution completed'));
                     ui.close();
                 }, 1000);
