@@ -4,6 +4,8 @@ const {configs} = require('../configs/yp_configs');
 let {resolveOSCommands} = require('../utils/yp_resolve_os');
 const inquirer = require("inquirer");
 const chalk = require('chalk');
+const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
+let { normalize,customMessage } = require('../utils/yp_normalize');
 
 module.exports = function(processingData, callback){
     let clock = [
@@ -49,7 +51,7 @@ module.exports = function(processingData, callback){
                 ui.updateBottomBar('');
                 ui.updateBottomBar(chalk.green('✓ Login Required. \n'));
                 ui.close();         
-                callback("You are not logged in. Please login using the command 'yappescli login'");
+                callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
             },1000)
     }
 }

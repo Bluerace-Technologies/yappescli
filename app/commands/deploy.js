@@ -3,10 +3,10 @@ const netrc = require('netrc');
 const { configs } = require('../configs/yp_configs');
 let { resolveOSCommands } = require('../utils/yp_resolve_os');
 let ypRequest = require('../utils/yp_request');
-let { normalize } = require('../utils/yp_normalize');
+let { normalize,customMessage } = require('../utils/yp_normalize');
 const util = require('util');
 const async = require('async');
-const { customErrorConfig } = require('../configs/yp_custom_error');
+const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
 const inquirer = require("inquirer");
 const chalk = require('chalk');
 
@@ -41,32 +41,43 @@ module.exports = function(processingData, callback) {
     let tickInterval = setInterval(() => {
         ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
     }, 250);
-
+    let netrcObj = netrc();
+    let loginUser = "";
 
     async.waterfall([
             function(callback) {
-                configs().getConfigSettings(function(err, data) {
-                    if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
-                        callback(err);
-                    } else {
-                        pathEndPoint = JSON.parse(data).path + normalize(processingData.apiName) + "/endpoints/";
-                        pathYpSetting = JSON.parse(data).path + '.ypsettings.json';
-                        businesslogicFile = pathEndPoint + normalize(processingData.endPointName) + ".js";
-                        ui.log.write(chalk.green('✓ Execution starts....'));
-                        callback(null);
-                    }
-                });
+                let hostObj=configs().getHostDetails();
+                if (netrcObj.hasOwnProperty(hostObj.host)) {
+                    loginUser = netrcObj[hostObj.host].login;
+                    callback(null);
+                } else {
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed... \n'));
+                    clearInterval(tickInterval);
+                    ui.close();
+                    callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
+                }
+            },
+            function(callback) {
+                if(processingData.endPointName!=undefined){ 
+                    configs().getConfigSettings(function(err, data) {
+                        if (err) {
+                            callback(err);
+                        } else {
+                            pathEndPoint = JSON.parse(data).path + normalize(processingData.apiName) + "/endpoints/";
+                            pathYpSetting = JSON.parse(data).path + '.ypsettings.json';
+                            businesslogicFile = pathEndPoint + normalize(processingData.endPointName) + ".js";
+                            ui.log.write(chalk.green('✓ Execution starts....'));
+                            callback(null);
+                        }
+                    });
+                }else {
+                    callback(customMessage(customErrorConfig().customError.VALIDATION_ENDPOINT_REQUIRED));
+                }
             },
             function(callback) {
                 fs.stat(businesslogicFile, function(err, stats) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
-                        callback(err);
+                        callback(customMessage(customErrorConfig().customError.APIEPERR));
                     } else {
                         let mtime = new Date(util.inspect(stats.mtime));
                         updateBusinessLogicData.lastModifiedDateTime = mtime;
@@ -78,15 +89,12 @@ module.exports = function(processingData, callback) {
                 fs.readFile(businesslogicFile, 'utf8', function(err, data) {
                     if (err) {
                         error_code = 3000;
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
                         if (err.errno == -2) {    
-                            callback(customErrorConfig().customError.ENOENT);
+                            callback(customMessage(customErrorConfig().customError.ENOENT));
                         } else if (err.code == 1) {
-                            callback(customErrorConfig().customError.EACCES);
+                            callback(customMessage(customErrorConfig().customError.EACCES));
                         } else {
-                            callback(customErrorConfig().customError.EOPNOTSUPP);
+                            callback(customMessage(customErrorConfig().customError.EOPNOTSUPP));
                         }
                     } else {
                         setTimeout(function() {
@@ -102,9 +110,6 @@ module.exports = function(processingData, callback) {
                 let errorCondition = false;
                 fs.readFile(pathYpSetting, 'utf8', function(err, data) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
                         ypSettings = JSON.parse(data);
@@ -124,10 +129,7 @@ module.exports = function(processingData, callback) {
                             }
                         }
                         if (errorCondition) {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
-                            callback(apiNameError);
+                            callback(customMessage(customErrorConfig().customError.INVALID_ENDPOINTNAME.errorMessage));
                         } else {
                             setTimeout(function() {
                                 ui.log.write(chalk.green('✓ Getting the latest code from local...'));
@@ -141,9 +143,6 @@ module.exports = function(processingData, callback) {
                 let endPointPath = "/cli/resource/businesslogic/" + processingData.apiName;
                 ypRequest.call(endPointPath, "put", updateBusinessLogicData, function(err, statusResponse) {
                     if (err) {
-                        ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                        clearInterval(tickInterval);
-                        ui.close();
                         callback(err);
                     } else {
                         if (statusResponse.code == 200) {
@@ -152,9 +151,6 @@ module.exports = function(processingData, callback) {
                                 callback(null, statusResponse);
                             }, 1000);
                         } else {
-                            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-                            clearInterval(tickInterval);
-                            ui.close();
                             callback(statusResponse.data.message);
                         }
                     }
@@ -163,12 +159,14 @@ module.exports = function(processingData, callback) {
         ],
         function(error, result) {
             if (error) {
+                clearInterval(tickInterval);
+                ui.close();
                 callback(error);
             } else {
                 setTimeout(function() {
                     clearInterval(tickInterval);
                     ui.updateBottomBar('');
-                    callback(null, result.data.message);
+                    callback(null, customMessagesConfig().customMessages.DEPLOY_SUCCESS.message);
                     ui.updateBottomBar(chalk.green('✓ Deploy command execution completed'));
                     ui.close();
                 }, 1000);

@@ -56,7 +56,6 @@ module.exports = function(processingData, callback) {
         clearInterval(tickInterval);
         ui.close();
         return callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
-
     }
     if (!processingData.run) {
         processingData.run = 'local';
