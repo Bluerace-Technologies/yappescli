@@ -21,7 +21,7 @@ module.exports = function(processingData, callback) {
     if (netrcObj.hasOwnProperty(hostObj.host)) {
         loginUser = netrcObj[hostObj.host].login;
     } else {
-        callback(customErrorConfig().customError.VALIDATION_ERROR_LOGIN);
+        callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
     }
     async.waterfall([
         function(callback) {
