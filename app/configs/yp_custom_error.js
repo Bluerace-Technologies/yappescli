@@ -15,11 +15,83 @@ exports.customErrorConfig = function() {
             },
             'ENOENT': {
                 errorCode: 3002,
-                errorMessage: "Current Path does not Exists.Kindly Check your API Name"
-            }
+                errorMessage: "Current Path does not Exists."
+            },
+            'RNERR': {
+                errorCode: 3400,
+                errorMessage: "Runtime environment flag is not valid : 'remote' and 'local' are the available options."
+            },
+            'APNAMEERR': {
+                errorCode: 3400,
+                errorMessage: "Provided API name is not valid."
+            },
+            'ENVERR': {
+                errorCode: 3400,
+                errorMessage: "Yappes environment value is not valid. 'development'and 'testing' are the available options."
+            },
+            'CDAHEAD': {
+                errorCode: 3400,
+                errorMessage: "Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n"
+            },
+            'EPNAMEERR': {
+                errorCode: 3400,
+                errorMessage: "Provided Endpoint name is not valid."
+            },
+            'PATHPRERR': {
+                errorCode: 3400,
+                errorMessage: "Invalid Path Parameters passed \n "
+            },
+            'APIEPERR': {
+                errorCode: 3400,
+                errorMessage: "Provided Api Name or Endpoint name is not valid. \n "
+            },
+            'METHODNTALLOWEDERR': {
+                errorCode: 3500,
+                errorMessage: "Unsupported Method/Method Not Allowed. Please refer read me section \n "
+            },
+            'METHODNAERR': {
+                errorCode: 3500,
+                errorMessage: "Method not Available in parameters. \n "
+            },
+            'PAYLOADERR': {
+                errorCode: 3500,
+                errorMessage: "Payload required for PUT/POST Methods \n "
+            },
+            'RUNTIMEERR': {
+                errorCode: 3500,
+                errorMessage: ""
+            },
+
+
+
         }
     }
 }
+
+exports.customMessagesConfig = function() {
+    return {
+        customMessages: {
+            'CLSUCCESS': {
+                code: 3200,
+                message: "Successfully Cloned the API "
+            },
+            'RMCODEAHEAD': {
+                code: 3200,
+                message: " Remote code is ahead of your local machine.Use the command 'yappescli pull' to sync with your local code. \n"
+            },
+            'LCCODEAHEAD': {
+                code: 3200,
+                message: " Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n"
+            },
+        }
+    }
+}
+/*YAPPES CUSTOME MESSAGE SPEC 
+31xx > Series
+Validation Errors : 3400
+Logic Error : 3500
+Proper Response : 3200
+*/
 /* LINUX err REF
 EPERM 1 Operation not permitted
 ENOENT 2 No such file or directory

@@ -1,8 +1,12 @@
 const { createLogger, format, transports } = require('winston');
+const { customErrorConfig, customMessagesConfig } = require('./configs/yp_custom_error');
+let { customMessage, invalidName } = require('./utils/yp_normalize');
 require('winston-daily-rotate-file');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
+const inquirer = require("inquirer");
+const chalk = require('chalk');
 
 const env = process.env.NODE_ENV || 'development';
 const logDir = process.env.HOME + '/.config/yappes/logs';
@@ -67,6 +71,25 @@ YappesCliProcessor.prototype.loadCommand = function(command) {
 
 YappesCliProcessor.prototype.executeCommand = function(command, inputData, callback) {
     let self = this;
+    let clock = [
+        "⠋",
+        "⠙",
+        "⠹",
+        "⠸",
+        "⠼",
+        "⠴",
+        "⠦",
+        "⠧",
+        "⠇",
+        "⠏"
+    ];
+
+    let counter = 0;
+    let ui = new inquirer.ui.BottomBar();
+
+    let tickInterval = setInterval(() => {
+        ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
+    }, 250);
     let commandModule = self.loadCommand(command);
     if (typeof commandModule == "function") {
 
@@ -75,26 +98,39 @@ YappesCliProcessor.prototype.executeCommand = function(command, inputData, callb
         } else {
             inputData["endPointPath"] = "not-required";
         }
-        commandModule(inputData, function(err, apiResults) {
-            if (err) {
-                let logObject = {
-                    "command": command,
-                    "inputData": inputData,
-                    "status": "error",
-                    "errorMessage": err
-                };
-                errorLogger.error(logObject);
-                callback(err);
-            } else {
-                let logObject = {
-                    "command": command,
-                    "inputData": inputData,
-                    "status": "success"
-                };
-                accessLogger.info(logObject);
-                callback(null, apiResults);
-            }
-        });
+        try {
+            commandModule(inputData, function(err, apiResults) {
+                if (err) {
+                    let logObject = {
+                        "command": command,
+                        "inputData": inputData,
+                        "status": "error",
+                        "errorMessage": err
+                    };
+                    errorLogger.error(logObject);
+                    ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+                    clearInterval(tickInterval);
+                    ui.close();
+                    callback(err);
+                } else {
+                    let logObject = {
+                        "command": command,
+                        "inputData": inputData,
+                        "status": "success"
+                    };
+                    accessLogger.info(logObject);
+                    clearInterval(tickInterval);
+                    ui.close();
+                    callback(null, apiResults);
+                }
+            });
+        } catch (err) {
+            let error = customErrorConfig().customError.RUNTIMEERR;
+            error.errorMessage = err;
+            clearInterval(tickInterval);
+            ui.close();
+            callback(customMessage(error));
+        }
     } else {
         let logObject = {
             "command": command,
@@ -103,6 +139,8 @@ YappesCliProcessor.prototype.executeCommand = function(command, inputData, callb
             "errorMessage": 'Invalid Command'
         };
         errorLogger.error(logObject);
+        clearInterval(tickInterval);
+        ui.close();
         callback('Invalid Command');
     }
 
