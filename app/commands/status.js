@@ -121,7 +121,10 @@ module.exports = function(processingData, callback) {
                     if (err) {
                         callback(err);
                     } else {
-                        callback(null, syncResponse);
+                        let status={};
+                        status.syncResponse=syncResponse;
+                        status.statusResponse=statusResponse;
+                        callback(null, status);
                     }
                 });
             } else { callback(statusResponse); }

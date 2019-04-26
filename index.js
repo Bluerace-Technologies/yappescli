@@ -96,7 +96,7 @@ program
             if (err) {
                 console.log(err);
             } else {
-                console.log(results);
+                console.log(results.syncResponse);
             }
         });
     });
@@ -127,12 +127,15 @@ program
     .option('-a, --apiname <apiname>', 'API Name to enter')
     .option('-e, --endpointname <endpointname>', 'Endpoint Name to enter')
     .option('-r, --run <runflag>', 'execute the business logic in remote or local')
+    .option('-c, --config <config>', 'config file to be passed')
     .action(function(options) {
         let inputData = {
             "apiName": options.apiname,
-            "endPointName": options.endpointname
-        };
-       yappesCliObj.executeCommand('execute', inputData, function(err, results) {
+            "endPointName": options.endpointname,
+            "run":options.run?options.run:"",
+            "configFile": options.config?options.config:""
+        };        
+        yappesCliObj.executeCommand('execute', inputData, function(err, results) {
             if (err) {
                 console.log(err);
             } else {

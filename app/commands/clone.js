@@ -17,7 +17,7 @@ module.exports = function(processingData, callback) {
     let apiHashDetails = {};
     let configFileExists = false;
     let workspace = "";
-    let hostObj=configs().getHostDetails();
+    let hostObj = configs().getHostDetails();
     if (netrcObj.hasOwnProperty(hostObj.host)) {
         loginUser = netrcObj[hostObj.host].login;
     } else {
@@ -25,26 +25,26 @@ module.exports = function(processingData, callback) {
     }
     async.waterfall([
         function(callback) {
-            configs().getConfigSettings(function(err, data){
-                if(err){
-                   if(err.errno==-2){
+            configs().getConfigSettings(function(err, data) {
+                if (err) {
+                    if (err.errno == -2) {
                         let path = process.env.HOME + '/.config/yappes/settings.json';
-                        createWsPath(path, function(err,workspacePath) {
+                        createWsPath(path, function(err, workspacePath) {
                             if (err) {
                                 callback(err);
                             } else {
-                                workspace=workspacePath;
+                                workspace = workspacePath;
                                 callback(null);
                             }
-                        });                       
+                        });
                     } else {
                         callback(err);
                     }
                 } else {
-                    workspace = JSON.parse(data).path; 
+                    workspace = JSON.parse(data).path;
                     callback(null);
                 }
-            });             
+            });
         },
         function(callback) {
             if (fs.existsSync(workspace + settingFileName)) {
@@ -130,12 +130,21 @@ module.exports = function(processingData, callback) {
                     }
                 });
             }
-        },function(result,callback){
-            createYpClasses(workspace,apiHashDetails,function(err){
+        },
+        function(result, callback) {
+            createYpClasses(workspace, apiHashDetails, function(err) {
                 if (err) {
                     callback(err);
+                } else {
+                    callback(null, result);
                 }
-                else{
+            });
+        },function(result,callback){
+            let configFilePath=workspace + '/' + apiHashDetails.apiDetails.apiName + '/test/runtime_config.json';
+            createRuntimeConfig(apiHashDetails,configFilePath,function(err){
+                if (err) {
+                    callback(err);
+                }else{
                     callback(null,result);
                 }
             });
@@ -170,18 +179,21 @@ function createSettingsFile(apiHashDetails, workspace, callback) {
                 apiReferences: [{
                     apiName: apiHashDetails.apiDetails.apiName,
                     hash: apiHashDetails.apiDetails.hash,
-                    remoteEndpoints:apiHashDetails.apiDetails.remoteEndpoints,
+                    yappesUrls: apiHashDetails.apiDetails.urls,
+                    remoteEndpoints: apiHashDetails.apiDetails.remoteEndpoints,
                     endPointReferences: []
                 }]
             };
             for (var i = 0; i < apiHashDetails.endpointDetails.length; i++) {
                 let endPointTempVar = {
                     endpointName: apiHashDetails.endpointDetails[i].endPointName,
-                    hash: apiHashDetails.endpointDetails[i].hash
+                    hash: apiHashDetails.endpointDetails[i].hash,
+                    endPoint: apiHashDetails.endpointDetails[i].endPoint,
+                    method:apiHashDetails.endpointDetails[i].method
                 };
                 settingsData.apiReferences[0].endPointReferences.push(endPointTempVar);
             }
-            fs.writeFile(path + settingFileName, JSON.stringify(settingsData,null,4), function(err) {
+            fs.writeFile(path + settingFileName, JSON.stringify(settingsData, null, 4), function(err) {
                 if (err) {
                     callback(err);
                 } else {
@@ -212,7 +224,8 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
                 apiReferences: {
                     apiName: apiHashDetails.apiDetails.apiName,
                     hash: apiHashDetails.apiDetails.hash,
-                    remoteEndpoints:apiHashDetails.apiDetails.remoteEndpoints,
+                    yappesUrls: apiHashDetails.apiDetails.urls,
+                    remoteEndpoints: apiHashDetails.apiDetails.remoteEndpoints,
                     endPointReferences: []
                 }
             };
@@ -220,7 +233,9 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
             for (var i = 0; i < apiHashDetails.endpointDetails.length; i++) {
                 let endPointTempVar = {
                     endpointName: apiHashDetails.endpointDetails[i].endPointName,
-                    hash: apiHashDetails.endpointDetails[i].hash
+                    hash: apiHashDetails.endpointDetails[i].hash,
+                    endPoint: apiHashDetails.endpointDetails[i].endPoint,
+                    method:apiHashDetails.endpointDetails[i].method
                 };
                 settingsData.apiReferences.endPointReferences.push(endPointTempVar);
             }
@@ -247,7 +262,7 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
             });
         },
         function(fileData, callback) {
-            fs.writeFile(path + settingFileName, JSON.stringify(fileData,null,4), function(err) {
+            fs.writeFile(path + settingFileName, JSON.stringify(fileData, null, 4), function(err) {
                 if (err) { callback(err) } else {
                     callback(null);
                 }
@@ -275,23 +290,24 @@ function createWsPath(path, callback) {
     let workspacePath = {
         "path": process.cwd() + '/ypworkspace/'
     };
-    let configPath = process.env.HOME+"/.config/yappes";
-    let cmd = commandOptions['create-dir']+" -p "+configPath;
-    nodeCmd.get(cmd,function(err,data){
-        if(err){
+    let configPath = process.env.HOME + "/.config/yappes";
+    let cmd = commandOptions['create-dir'] + " -p " + configPath;
+    nodeCmd.get(cmd, function(err, data) {
+        if (err) {
             callback(err);
         } else {
             fs.writeFile(path, JSON.stringify(workspacePath), function(err) {
-                if(err){ 
-                    callback(err) 
+                if (err) {
+                    callback(err)
                 } else {
-                    callback(null,workspacePath.path);
+                    callback(null, workspacePath.path);
                 }
-            });            
+            });
         }
     });
 
 }
+
 function createYpClasses(workspace, apiHashDetails, callback) {
     let path = workspace;
     let commandOptions = resolveOSCommands();
@@ -331,3 +347,20 @@ function createYpClasses(workspace, apiHashDetails, callback) {
     });
 }
 
+function createRuntimeConfig(apiHashDetails, path, callback) {
+    let environmentDetails = {
+        body: {},
+        queryParameters: {},
+        headers: {},
+        pathParameters: {},
+        yappesEnvironment: "",
+        yappesKey: ""
+    };
+   fs.writeFile(path, JSON.stringify(environmentDetails, null, 4), function(err) {
+        if (err) {
+            callback(err)
+        } else {
+            callback(null);
+        }
+    });
+}
