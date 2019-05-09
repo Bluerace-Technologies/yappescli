@@ -177,7 +177,7 @@ module.exports = function(processingData, callback) {
             });
         },
         function(result, callback) {
-            let configFilePath = workspace + '/' + apiHashDetails.apiDetails.apiName + '/test/runtime_config.json';
+            let configFilePath = workspace + '/' + normalize(apiHashDetails.apiDetails.apiName) + '/test/runtime_config.json';
             createRuntimeConfig(apiHashDetails, configFilePath, function(err) {
                 if (err) {
                     callback(err);
@@ -363,7 +363,7 @@ function createYpClasses(workspace, apiHashDetails, callback) {
     let commandOptions = resolveOSCommands();
     let requestFile = 'yprequest.json';
     let responseFile = 'ypresponse.json';
-    let touchCmd = commandOptions['create-dir'] + ' -p ' + path + '/' + apiHashDetails.apiDetails.apiName + '/test';
+    let touchCmd = commandOptions['create-dir'] + ' -p ' + path + '/' + normalize(apiHashDetails.apiDetails.apiName) + '/test';
     nodeCmd.get(touchCmd, function(err, data) {
         if (err) {
             callback(err);
@@ -379,7 +379,7 @@ function createYpClasses(workspace, apiHashDetails, callback) {
                 });
             }, function(fileData, callback) {
                 let reqResObject = fileData;
-                fs.writeFile(path + '/' + apiHashDetails.apiDetails.apiName + '/test/' + 'executestub.js', reqResObject, function(err) {
+                fs.writeFile(path + normalize(apiHashDetails.apiDetails.apiName) + '/test/' + 'executestub.js', reqResObject, function(err) {
                     if (err) {
                         callback(err);
                     } else {
