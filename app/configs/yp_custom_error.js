@@ -1,118 +1,118 @@
-exports.customErrorConfig = function() {
-    return {
-        customError: {
-            'ELIBBAD': {
-                errorCode: 3080,
-                errorMessage: "Current operation is interuppted due to some tampering in the default directory or file structure. You can delete the 'ypworkspace' folder and execute 'clone' command."
-            },
-            'EACCES': {
-                errorCode: 3013,
-                errorMessage: "Current path does not have the write permission. Please do the cloning process in the path which you have write permission. "
-            },
-            'EOPNOTSUPP': {
-                errorCode: 3095,
-                errorMessage: "Operation not supported"
-            },
-            'ENOENT': {
-                errorCode: 3002,
-                errorMessage: "Current Path does not Exists."
-            },
-            'RNERR': {
-                errorCode: 3400,
-                errorMessage: "Runtime environment flag is not valid : 'remote' and 'local' are the available options."
-            },
-            'APNAMEERR': {
-                errorCode: 3400,
-                errorMessage: "Provided API name is not valid."
-            },
-            'ENVERR': {
-                errorCode: 3400,
-                errorMessage: "Yappes environment value is not valid. 'development'and 'testing' are the available options."
-            },
-            'CDAHEAD': {
-                errorCode: 3400,
-                errorMessage: "Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n"
-            },
-            'EPNAMEERR': {
-                errorCode: 3400,
-                errorMessage: "Provided Endpoint name is not valid."
-            },
-            'PATHPRERR': {
-                errorCode: 3400,
-                errorMessage: "Invalid Path Parameters passed \n "
-            },
-            'APIEPERR': {
-                errorCode: 3400,
-                errorMessage: "Provided Api Name or Endpoint name is not valid. \n "
-            },
-            'METHODNTALLOWEDERR': {
-                errorCode: 3500,
-                errorMessage: "Unsupported Method/Method Not Allowed. Please refer read me section \n "
-            },
-            'METHODNAERR': {
-                errorCode: 3500,
-                errorMessage: "Method not Available in parameters. \n "
-            },
-            'PAYLOADERR': {
-                errorCode: 3500,
-                errorMessage: "Payload required for PUT/POST Methods \n "
-            },
-            'RUNTIMEERR': {
-                errorCode: 3500,
-                errorMessage: ""
-            },
-            'INVALID_ENDPOINTNAME':{
-                errorCode: 3400,
-                errorMessage: "Provided Endpoint name is not valid."
-            },
-            'VALIDATION_ERROR_LOGIN':{
-                errorCode: 3400,
-                errorMessage: "You are not logged in. Please login using the command 'yappescli login'"  
-            },
-            'VALIDATION_ENDPOINT_REQUIRED':{
-                errorCode: 3400,
-                errorMessage: "Deploy command works only at the endpoint level.Please provide the Endpoint name."  
-            }            
-        }
-    }
-}
+exports.customErrorConfig = function () {
+  return {
+    customError: {
+      ELIBBAD: {
+        errorCode: 3080,
+        errorMessage: "Current operation is interuppted due to some tampering in the default directory or file structure. You can delete the 'ypworkspace' folder and execute 'clone' command.",
+      },
+      EACCES: {
+        errorCode: 3013,
+        errorMessage: 'Current path does not have the write permission. Please do the cloning process in the path which you have write permission. ',
+      },
+      EOPNOTSUPP: {
+        errorCode: 3095,
+        errorMessage: 'Operation not supported',
+      },
+      ENOENT: {
+        errorCode: 3002,
+        errorMessage: 'Current Path does not Exists.',
+      },
+      RNERR: {
+        errorCode: 3400,
+        errorMessage: "Runtime environment flag is not valid : 'remote' and 'local' are the available options.",
+      },
+      APNAMEERR: {
+        errorCode: 3400,
+        errorMessage: 'Provided API name is not valid.',
+      },
+      ENVERR: {
+        errorCode: 3400,
+        errorMessage: "Yappes environment value is not valid. 'development'and 'testing' are the available options.",
+      },
+      CDAHEAD: {
+        errorCode: 3400,
+        errorMessage: "Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n",
+      },
+      EPNAMEERR: {
+        errorCode: 3400,
+        errorMessage: 'Provided Endpoint name is not valid.',
+      },
+      PATHPRERR: {
+        errorCode: 3400,
+        errorMessage: 'Invalid Path Parameters passed \n ',
+      },
+      APIEPERR: {
+        errorCode: 3400,
+        errorMessage: 'Provided Api Name or Endpoint name is not valid. \n ',
+      },
+      METHODNTALLOWEDERR: {
+        errorCode: 3500,
+        errorMessage: 'Unsupported Method/Method Not Allowed. Please refer read me section \n ',
+      },
+      METHODNAERR: {
+        errorCode: 3500,
+        errorMessage: 'Method not Available in parameters. \n ',
+      },
+      PAYLOADERR: {
+        errorCode: 3500,
+        errorMessage: 'Payload required for PUT/POST Methods \n ',
+      },
+      RUNTIMEERR: {
+        errorCode: 3500,
+        errorMessage: '',
+      },
+      INVALID_ENDPOINTNAME: {
+        errorCode: 3400,
+        errorMessage: 'Provided Endpoint name is not valid.',
+      },
+      VALIDATION_ERROR_LOGIN: {
+        errorCode: 3400,
+        errorMessage: "You are not logged in. Please login using the command 'yappescli login'",
+      },
+      VALIDATION_ENDPOINT_REQUIRED: {
+        errorCode: 3400,
+        errorMessage: 'Deploy command works only at the endpoint level.Please provide the Endpoint name.',
+      },
+    },
+  };
+};
 
-exports.customMessagesConfig = function() {
-    return {
-        customMessages: {
-            'DEPLOY_SUCCESS': {
-                code : 3200,
-                message: "Successfully Deployed the local code to remote."
-            },
-            'PULL_INSYNC':{
-                code : 3200,
-                message: " Local and Remote are already in-sync. \n"
-            },
-            'PULL_BEHIND':{
-                code : 3200,
-                message: " Remote code was ahead of your Local code repo. Syncing is done. Now both the Local and Remote repo are in-sync. \n"
-            },
-            'PULL_FORWARD':{
-                code : 3200,
-                message: " Local is having the latest Code. Once you have done with your update use 'yappescli deploy' command to push it to Remote. \n"
-            },
-            'CLSUCCESS': {
-                code: 3200,
-                message: "Successfully Cloned the API "
-            },
-            'RMCODEAHEAD': {
-                code: 3200,
-                message: " Remote code is ahead of your local machine.Use the command 'yappescli pull' to sync with your local code. \n"
-            },
-            'LCCODEAHEAD': {
-                code: 3200,
-                message: " Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n"
-            },
-        }
-    }
-}
+exports.customMessagesConfig = function () {
+  return {
+    customMessages: {
+      DEPLOY_SUCCESS: {
+        code: 3200,
+        message: 'Successfully Deployed the local code to remote.',
+      },
+      PULL_INSYNC: {
+        code: 3200,
+        message: ' Local and Remote are already in-sync. \n',
+      },
+      PULL_BEHIND: {
+        code: 3200,
+        message: ' Remote code was ahead of your Local code repo. Syncing is done. Now both the Local and Remote repo are in-sync. \n',
+      },
+      PULL_FORWARD: {
+        code: 3200,
+        message: " Local is having the latest Code. Once you have done with your update use 'yappescli deploy' command to push it to Remote. \n",
+      },
+      CLSUCCESS: {
+        code: 3200,
+        message: 'Successfully Cloned the API ',
+      },
+      RMCODEAHEAD: {
+        code: 3200,
+        message: " Remote code is ahead of your local machine.Use the command 'yappescli pull' to sync with your local code. \n",
+      },
+      LCCODEAHEAD: {
+        code: 3200,
+        message: " Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n",
+      },
+    },
+  };
+};
 
-/*YAPPES CUSTOME MESSAGE SPEC 
+/* YAPPES CUSTOME MESSAGE SPEC
 31xx > Series
 Validation Errors : 3400
 Logic Error : 3500
@@ -240,7 +240,7 @@ EKEYREVOKED 128 Key has been revoked
 EKEYREJECTED 129 Key was rejected by service
 EOWNERDEAD 130 Owner died
 ENOTRECOVERABLE 131 State not recoverable
-ERFKILL 132 Operation not 
+ERFKILL 132 Operation not
 ESTRPIPE 86 Streams pipe error
 EUSERS 87 Too many users
 ENOTSOCK 88 Socket operation on non-socket
@@ -251,4 +251,4 @@ ENOPROTOOPT 92 Protocol not available
 EPROTONOSUPPORT 93 Protocol not supported
 ESOCKTNOSUPPORT 94 Socket type not supported
 EOPNOTSUPP 95 Operation not supported
-EPFNOSUPPORT 96 Protocol family not supported*/
+EPFNOSUPPORT 96 Protocol family not supported */

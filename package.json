@@ -10,14 +10,14 @@
   "scripts": {
     "start": "node ./bin/run",
     "postinstall": "node app/utils/create_workspace_path.js",
-    "test-lint":"eslint app",
+    "test-lint": "eslint app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
     "/app/**/*.js",
     "/npm-shrinkwrap.json"
   ],
-  "engines":{
+  "engines": {
     "node": ">=8.0.0"
   },
   "repository": {
@@ -35,10 +35,12 @@
   "homepage": "https://github.com/Bluerace-Technologies/yappescli#readme",
   "dependencies": {
     "async": "^2.6.2",
+    "chalk": "^2.4.2",
     "commander": "^2.19.0",
     "dotenv": "^6.2.0",
     "inquirer": "^6.2.1",
     "is-wsl": "^1.1.0",
+    "moment": "^2.24.0",
     "mongodb": "^2.2.34",
     "mysql": "^2.16.0",
     "mysql2": "^1.5.2",
