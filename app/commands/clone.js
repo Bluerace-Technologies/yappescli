@@ -390,7 +390,7 @@ module.exports = function (processingData, callback) {
       } else if (err.code == 1) {
         callback(customMessage(customErrorConfig().customError.EACCES));
       } else {
-        let serverError = customErrorConfig().customError.APNAMEERR;
+        const serverError = customErrorConfig().customError.APNAMEERR;
         serverError.errorMessage = err;
         callback(customMessage(serverError));
       }
@@ -399,6 +399,8 @@ module.exports = function (processingData, callback) {
         clearInterval(tickInterval);
         ui.updateBottomBar('');
         ui.updateBottomBar(chalk.green('✓ Clone command execution completed \n'));
+        ui.updateBottomBar(chalk.green('"ypworkspace" folder is created in the current directory for you'
+          + ' to work on the business logic.\n For details refer https://docs.yappes.com/cli_tool_clone \n'));
         ui.close();
         callback(null, res);
       }, 1000);

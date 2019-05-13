@@ -96,7 +96,7 @@ module.exports = function (processingData, callback) {
               callback(customMessage(customErrorConfig().customError.EOPNOTSUPP));
             } else {
               const mtime = new Date(util.inspect(stats.mtime));
-              let hashArr = [];
+              const hashArr = [];
               for (let apiNameIndex = 0; apiNameIndex < workspaceFileJson.apiReferences.length; apiNameIndex++) {
                 if (workspaceFileJson.apiReferences[apiNameIndex].apiName == processingData.apiName) {
                   for (let epIndex = 0; epIndex < workspaceFileJson.apiReferences[apiNameIndex].endPointReferences.length; epIndex++) {
@@ -146,7 +146,7 @@ module.exports = function (processingData, callback) {
           } else if (statusResponse.data[epIndex].remoteSync == 'no') {
             syncResponse += `'${statusResponse.data[epIndex].endpointName}'${customMessagesConfig().customMessages.LCCODEAHEAD.message}`;
             epIndex++;
-          } else if(statusResponse.data[epIndex].remoteSync == 'in-sync'){
+          } else if (statusResponse.data[epIndex].remoteSync == 'in-sync') {
             syncResponse += `'${statusResponse.data[epIndex].endpointName}'${customMessagesConfig().customMessages.PULL_INSYNC.message}`;
             epIndex++;
           }
