@@ -1,3 +1,4 @@
+/* eslint-disable */
 program
   .command('oauthlogin')
   .alias('l')

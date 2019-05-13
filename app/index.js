@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint no-console: "off" */
 const program = require('commander');
 const inquirer = require('inquirer');
 const yappesCli = require('./yappes_cli_processor');

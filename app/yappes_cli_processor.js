@@ -1,3 +1,4 @@
+/* eslint global-require: "off" */
 const { createLogger, format, transports } = require('winston');
 require('winston-daily-rotate-file');
 const fs = require('fs');
@@ -5,10 +6,9 @@ const path = require('path');
 const moment = require('moment');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
-const { customMessage, invalidName } = require('./utils/yp_normalize');
-const { customErrorConfig, customMessagesConfig } = require('./configs/yp_custom_error');
+const { customMessage } = require('./utils/yp_normalize');
+const { customErrorConfig } = require('./configs/yp_custom_error');
 
-const env = process.env.NODE_ENV || 'development';
 const logDir = `${process.env.HOME}/.config/yappes/logs`;
 
 if (!fs.existsSync(logDir)) {
@@ -60,7 +60,6 @@ YappesCliProcessor.prototype.loadCommand = function (command) {
     require.resolve(self.resolvePath + command);
     return require(self.resolvePath + command);
   } catch (e) {
-    console.log(e);
     return false;
   }
 };

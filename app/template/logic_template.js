@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 (async function () {
   const { yprequestFunction, ypresponseFunction } = require('./test/executestub');
   const templateLocation = 'globalTemplate';

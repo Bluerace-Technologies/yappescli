@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
+const { customErrorConfig } = require('../configs/yp_custom_error');
 
 const self = this;
 exports.normalize = function (inputData) {
@@ -35,7 +35,7 @@ exports.customMessage = function (customMessageObj) {
   } else if (customMessageObj.code) {
     message = `Success Code: ${customMessageObj.code}\n` + `Success Message: ${customMessageObj.message}`;
   } else {
-    	message = JSON.stringify(customMessageObj);
+    message = JSON.stringify(customMessageObj);
   }
   return message;
 };
@@ -44,7 +44,6 @@ exports.customMessage = function (customMessageObj) {
 exports.invalidName = function (workspacePath, callback) {
   fs.readdir(workspacePath, (err, files) => {
     if (err) {
-      error_code = 3000;
       if (err.errno == -2) {
         callback(self.customMessage(customErrorConfig().customError.ENOENT));
       } else if (err.code == 1) {

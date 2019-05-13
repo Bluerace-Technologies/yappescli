@@ -54,7 +54,6 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
   const path = workspace;
   async.waterfall([
     function (callback) {
-      const commandOptions = resolveOSCommands();
       fs.readFile(path + settingFileName, 'utf8', (err, data) => {
         if (err) {
           callback(err);
@@ -160,8 +159,6 @@ function createWsPath(path, callback) {
 function createYpClasses(workspace, apiHashDetails, callback) {
   const path = workspace;
   const commandOptions = resolveOSCommands();
-  const requestFile = 'yprequest.json';
-  const responseFile = 'ypresponse.json';
   const touchCmd = `${commandOptions['create-dir']} -p ${path}/${normalize(apiHashDetails.apiDetails.apiName)}/test`;
   nodeCmd.get(touchCmd, (err, data) => {
     if (err) {
@@ -172,7 +169,6 @@ function createYpClasses(workspace, apiHashDetails, callback) {
           if (err) {
             callback(err);
           } else {
-            const content = JSON.stringify(data);
             callback(null, data);
           }
         });
@@ -318,7 +314,9 @@ module.exports = function (processingData, callback) {
                     if (err) {
                       callback(err);
                     } else {
-                      fs.utimesSync(`${path}/${normalize(apiResponse.data.endpointDetails[index].endPointName)}.js`, new Date(apiResponse.data.endpointDetails[index].modifiedDateTime), new Date(apiResponse.data.endpointDetails[index].modifiedDateTime));
+                      fs.utimesSync(`${path}/${normalize(apiResponse.data.endpointDetails[index].endPointName)}.js`,
+                        new Date(apiResponse.data.endpointDetails[index].modifiedDateTime),
+                        new Date(apiResponse.data.endpointDetails[index].modifiedDateTime));
                       index++;
                       callback(null);
                     }
@@ -387,7 +385,6 @@ module.exports = function (processingData, callback) {
     if (err) {
       clearInterval(tickInterval);
       ui.close();
-      const error_code = 3000;
       if (err.errno == -2) {
         callback(customMessage(customErrorConfig().customError.ELIBBAD));
       } else if (err.code == 1) {

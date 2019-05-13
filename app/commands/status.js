@@ -40,6 +40,7 @@ module.exports = function (processingData, callback) {
   }, 250);
   const netrcObj = netrc();
   const hostObj = configs().getHostDetails();
+  let loginUser = '';
   if (netrcObj.hasOwnProperty(hostObj.host)) {
     loginUser = netrcObj[hostObj.host].login;
   } else {
@@ -63,7 +64,7 @@ module.exports = function (processingData, callback) {
     function (callback) {
       fs.readFile(`${workspacePath}/.ypsettings.json`, 'utf8', (err, data) => {
         if (err) {
-          error_code = 3000;
+          const error_code = 3000;
           if (err.errno == -2) {
             callback(customMessage(customErrorConfig().customError.ENOENT));
           } else if (err.code == 1) {

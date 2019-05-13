@@ -4,7 +4,7 @@ exports.configs = function configs() {
   return {
     getHostDetails() {
       let hostDetails = {};
-      if (process.env.YAPPES_ENV = 'development') {
+      if (process.env.YAPPES_ENV == 'development') {
         hostDetails = {
           host: 'localhost',
           port: 3001,

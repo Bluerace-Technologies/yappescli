@@ -1,14 +1,11 @@
-const fs = require('fs');
 const netrc = require('netrc');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const { configs } = require('../configs/yp_configs');
 const ypRequest = require('../utils/yp_request');
-const { resolveOSCommands } = require('../utils/yp_resolve_os');
 
 
 module.exports = function (processingData, callback) {
-  const fpath = configs().netrcPath;
   const hostObj = configs().getHostDetails();
   const netrcObj = netrc();
   const data = {

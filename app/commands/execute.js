@@ -1,6 +1,5 @@
 const fs = require('fs');
 const netrc = require('netrc');
-const util = require('util');
 const async = require('async');
 const nodeCmd = require('node-cmd');
 const http = require('http');
@@ -10,13 +9,75 @@ const qs = require('qs');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const {
-  normalize, denormalize, customMessage, invalidName,
+  normalize, customMessage, invalidName,
 } = require('../utils/yp_normalize');
-const ypRequest = require('../utils/yp_request');
 const { resolveOSCommands } = require('../utils/yp_resolve_os');
-const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
+const { customErrorConfig } = require('../configs/yp_custom_error');
 const { configs } = require('../configs/yp_configs');
 const status = require('./status');
+
+
+function runLogic(apiUrl, parameters, yappesKey, callback) {
+  let reqSchemeObj = https;
+  let responseChunk = '';
+  const methodList = ['get', 'post', 'put', 'delete', 'patch'];
+  if (parameters.method) {
+    if (parameters.method === parameters.method.toUpperCase()) {
+      parameters.method = parameters.method.toLowerCase();
+    } else {
+      parameters.method = parameters.method.toLowerCase();
+    }
+    if (methodList.indexOf(parameters.method) == -1) {
+      callback(customMessage(customErrorConfig().customError.METHODNTALLOWEDERR));
+    }
+  } else {
+    callback(customMessage(customErrorConfig().customError.METHODNAERR));
+  }
+
+
+  const urlParts = url.parse(apiUrl);
+  const options = {
+    host: urlParts.hostname,
+    path: urlParts.pathname,
+    port: urlParts.port ? urlParts.port : 98,
+    method: parameters.method,
+    headers: parameters.headers,
+  };
+  if (options.method != 'get') {
+    if (Object.keys(parameters.payload).length <= 0) {
+      return callback(customMessage(customErrorConfig().customError.PAYLOADERR));
+    }
+  }
+  options.headers['X-YAPPES-KEY'] = yappesKey;
+  if (!options.port) {
+    options.port = 443;
+  }
+  if (Object.keys(parameters.queryparams).length > 0) {
+    options.path += `?${qs.stringify(parameters.queryparams, {
+      encode: false,
+    })}`;
+  }
+
+  if (!urlParts.protocol.match(/https+/)) {
+    reqSchemeObj = http;
+  } else {
+    reqSchemeObj = https;
+  }
+  const requestObj = reqSchemeObj.request(options, (response) => {
+    response.on('data', (chunk) => {
+      responseChunk += chunk;
+    });
+    response.on('end', () => {
+      callback(null, responseChunk);
+    });
+  });
+  requestObj.write(JSON.stringify(parameters.payload));
+  requestObj.on('error', (err) => {
+    callback(err);
+  });
+
+  requestObj.end();
+}
 
 module.exports = function (processingData, callback) {
   const executeLogic = {
@@ -49,6 +110,7 @@ module.exports = function (processingData, callback) {
   let pathYpSetting = '';
   let ypSettings = '';
   let businesslogicFile = '';
+  let loginUser = '';
   const envRunList = ['remote', 'local'];
   const hostObj = configs().getHostDetails();
   if (netrcObj.hasOwnProperty(hostObj.host)) {
@@ -86,7 +148,6 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(customMessage(customErrorConfig().customError.APIEPERR));
           } else {
-            businessLogic = data;
             executeLogic.businessLogic = data;
             ui.log.write(chalk.green('✓ Fetching the code ...'));
             callback(null, executeLogic);
@@ -127,11 +188,11 @@ module.exports = function (processingData, callback) {
       },
       function (executeLogic, callback) {
         let logic = '';
+        let apiHash = '';
         async.waterfall([
           function (callback) {
             const cmd = 'npm root -g';
             let context = [];
-            const apiData = '';
             ypSettings.apiReferences.forEach((apiRef) => {
               if (processingData.apiName == apiRef.apiName) {
                 context = apiRef.remoteEndpoints;
@@ -215,7 +276,6 @@ module.exports = function (processingData, callback) {
             });
           },
           function (file, callback) {
-            const commandOptions = resolveOSCommands();
             const cmd = `node ${file}`;
             nodeCmd.get(cmd, (err, data) => {
               if (err) {
@@ -265,7 +325,6 @@ module.exports = function (processingData, callback) {
       function (callback) {
         fs.readFile(processingData.configFile, 'utf8', (err, data) => {
           if (err) {
-            error_code = 3000;
             if (err.errno == -2) {
               callback(customMessage(customErrorConfig().customError.ENOENT));
             } else if (err.code == 1) {
@@ -340,7 +399,6 @@ module.exports = function (processingData, callback) {
       function (pathYpSetting, callback) {
         fs.readFile(pathYpSetting, 'utf8', (err, data) => {
           if (err) {
-            error_code = 3000;
             if (err.errno == -2) {
               callback(customMessage(customErrorConfig().customError.ENOENT));
             } else if (err.code == 1) {
@@ -375,7 +433,6 @@ module.exports = function (processingData, callback) {
           const endpointArr = yappesEndpointConfig.endPoint.split('/');
           const pathParamsList = Object.keys(processingData.pathParameters);
           const pathValuesList = Object.values(processingData.pathParameters);
-          const paramsLength = pathParamsList.length;
           let keyCount = 0;
           const tempArr = [];
           endpointArr.forEach((el) => {
@@ -444,67 +501,3 @@ module.exports = function (processingData, callback) {
     });
   }
 };
-
-
-function runLogic(apiUrl, parameters, yappesKey, callback) {
-  const self = this;
-  let reqSchemeObj = https;
-  let responseChunk = '';
-  const methodList = ['get', 'post', 'put', 'delete', 'patch'];
-  if (parameters.method) {
-    if (parameters.method === parameters.method.toUpperCase()) {
-      parameters.method = parameters.method.toLowerCase();
-    } else {
-      parameters.method = parameters.method.toLowerCase();
-    }
-    if (methodList.indexOf(parameters.method) == -1) {
-      callback(customMessage(customErrorConfig().customError.METHODNTALLOWEDERR));
-    }
-  } else {
-    callback(customMessage(customErrorConfig().customError.METHODNAERR));
-  }
-
-
-  const urlParts = url.parse(apiUrl);
-  const options = {
-    host: urlParts.hostname,
-    path: urlParts.pathname,
-    port: urlParts.port ? urlParts.port : 98,
-    method: parameters.method,
-    headers: parameters.headers,
-  };
-  if (options.method != 'get') {
-    if (Object.keys(parameters.payload).length <= 0) {
-      return callback(customMessage(customErrorConfig().customError.PAYLOADERR));
-    }
-  }
-  options.headers['X-YAPPES-KEY'] = yappesKey;
-  if (!options.port) {
-    options.port = 443;
-  }
-  if (Object.keys(parameters.queryparams).length > 0) {
-    options.path += `?${qs.stringify(parameters.queryparams, {
-      encode: false,
-    })}`;
-  }
-
-  if (!urlParts.protocol.match(/https+/)) {
-    reqSchemeObj = http;
-  } else {
-    reqSchemeObj = https;
-  }
-  const requestObj = reqSchemeObj.request(options, (response) => {
-    response.on('data', (chunk) => {
-      responseChunk += chunk;
-    });
-    response.on('end', () => {
-      callback(null, responseChunk);
-    });
-  });
-  requestObj.write(JSON.stringify(parameters.payload));
-  requestObj.on('error', (err) => {
-    callback(err);
-  });
-
-  requestObj.end();
-}

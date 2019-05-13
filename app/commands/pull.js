@@ -5,7 +5,6 @@ const chalk = require('chalk');
 const util = require('util');
 const async = require('async');
 const { configs } = require('../configs/yp_configs');
-const { resolveOSCommands } = require('../utils/yp_resolve_os');
 const ypRequest = require('../utils/yp_request');
 const { normalize, customMessage, invalidName } = require('../utils/yp_normalize');
 const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
@@ -227,19 +226,22 @@ module.exports = function (processingData, callback) {
     function (callback) {
       let epIndex = 0;
       let syncResponse = '';
+      let path = '';
       if (responseDataPull.data.endpointPullList.length >= 1) {
         async.whilst(() => epIndex < responseDataPull.data.endpointPullList.length, (callback) => {
           if (responseDataPull.data.endpointPullList[epIndex].remoteSync == 'yes') {
             syncResponse += `'${responseDataPull.data.endpointPullList[epIndex].endpointName}'${customMessagesConfig().customMessages.PULL_BEHIND.message}`;
             path = `${pathEndPoint + normalize(responseDataPull.data.endpointPullList[epIndex].endpointName)}.js`;
-            writeFile(path, decodeURI(responseDataPull.data.endpointPullList[epIndex].businesslogic), new Date(responseDataPull.data.endpointPullList[epIndex].remoteModifiedDateTime), (err) => {
-              if (err) {
-                callback(err);
-              } else {
-                epIndex++;
-                callback(null);
-              }
-            });
+            writeFile(path, decodeURI(responseDataPull.data.endpointPullList[epIndex].businesslogic),
+              new Date(responseDataPull.data.endpointPullList[epIndex].remoteModifiedDateTime),
+              (err) => {
+                if (err) {
+                  callback(err);
+                } else {
+                  epIndex++;
+                  callback(null);
+                }
+              });
           } else if (responseDataPull.data.endpointPullList[epIndex].remoteSync == 'no') {
             syncResponse += `'${responseDataPull.data.endpointPullList[epIndex].endpointName}'${customMessagesConfig().customMessages.PULL_FORWARD.message}`;
             epIndex++;

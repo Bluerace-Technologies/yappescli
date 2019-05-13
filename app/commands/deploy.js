@@ -5,14 +5,12 @@ const async = require('async');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const { configs } = require('../configs/yp_configs');
-const { resolveOSCommands } = require('../utils/yp_resolve_os');
 const ypRequest = require('../utils/yp_request');
 const { normalize, customMessage } = require('../utils/yp_normalize');
 const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
 
 
 module.exports = function (processingData, callback) {
-  const apiNameError = 'API Name is Invalid';
   const updateBusinessLogicData = {
     endpointReference: '',
     businessLogic: '',
@@ -88,7 +86,6 @@ module.exports = function (processingData, callback) {
     function (callback) {
       fs.readFile(businesslogicFile, 'utf8', (err, data) => {
         if (err) {
-          const error_code = 3000;
           if (err.errno == -2) {
             callback(customMessage(customErrorConfig().customError.ENOENT));
           } else if (err.code == 1) {
@@ -99,7 +96,6 @@ module.exports = function (processingData, callback) {
         } else {
           setTimeout(() => {
             ui.log.write(chalk.green('✓ Checking the apiname and endpointname...'));
-            businessLogic = data;
             updateBusinessLogicData.businessLogic = data;
             callback(null, updateBusinessLogicData);
           }, 1000);

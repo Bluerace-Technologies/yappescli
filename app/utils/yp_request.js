@@ -1,13 +1,14 @@
 const request = require('request');
 const netrc = require('netrc');
 const { configs } = require('../configs/yp_configs');
-const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
+const { customErrorConfig } = require('../configs/yp_custom_error');
 
 exports.call = function (endPointPath, operation, data, callback) {
   const self = this;
   let reqOptions = {};
   const netrcObj = netrc();
   const hostObj = configs().getHostDetails();
+  let formattedError = '';
   let endPointUri = `${hostObj.scheme}://${hostObj.host}:${hostObj.port}${hostObj.basePath}`;
   endPointUri += endPointPath;
 
@@ -36,7 +37,7 @@ exports.call = function (endPointPath, operation, data, callback) {
           callback(formattedError);
         }
       } else {
-	            callback(null, body);
+        callback(null, body);
       }
     });
   } else if (operation == 'put') {
@@ -51,7 +52,7 @@ exports.call = function (endPointPath, operation, data, callback) {
           callback(formattedError);
         }
       } else {
-	            callback(null, body);
+        callback(null, body);
       }
     });
   } else if (operation == 'get') {
@@ -66,7 +67,7 @@ exports.call = function (endPointPath, operation, data, callback) {
           callback(formattedError);
         }
       } else {
-	            callback(null, body);
+        callback(null, body);
       }
     });
   } else if (operation == 'delete') {
@@ -81,7 +82,7 @@ exports.call = function (endPointPath, operation, data, callback) {
           callback(formattedError);
         }
       } else {
-	            callback(null, body);
+        callback(null, body);
       }
     });
   }
@@ -92,6 +93,7 @@ exports.cliLogin = function (endPointPath, operation, data, callback) {
   const self = this;
   let reqOptions = {};
   const hostObj = configs().getHostDetails();
+  let formattedError = '';
   let endPointUri = `${hostObj.scheme}://${hostObj.host}:${hostObj.port}${hostObj.basePath}`;
   endPointUri += endPointPath;
 

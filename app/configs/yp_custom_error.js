@@ -1,3 +1,4 @@
+/* eslint max-len: "off" */
 exports.customErrorConfig = function () {
   return {
     customError: {
@@ -31,7 +32,7 @@ exports.customErrorConfig = function () {
       },
       CDAHEAD: {
         errorCode: 3400,
-        errorMessage: "Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n",
+        errorMessage: "Local code is ahead of remote server.Use the command 'yappescli deploy' to sync with remote code. \n",
       },
       EPNAMEERR: {
         errorCode: 3400,
@@ -106,7 +107,7 @@ exports.customMessagesConfig = function () {
       },
       LCCODEAHEAD: {
         code: 3200,
-        message: " Local code is ahead of remote server.Use the command 'yappescli push' to sync with remote code. \n",
+        message: " Local code is ahead of remote server.Use the command 'yappescli deploy' to sync with remote code. \n",
       },
     },
   };

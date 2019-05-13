@@ -1,4 +1,3 @@
-const path = require('path');
 const isWsl = require('is-wsl');
 
 exports.resolveOSCommands = function resolveOSCommands() {

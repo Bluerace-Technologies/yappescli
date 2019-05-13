@@ -1,6 +1,8 @@
 const url = require('url');
 const netrc = require('netrc');
+const httpObj = require('http');
 const { configs } = require('../configs/yp_configs');
+
 
 function YpStoreObject(remoteEndPoint) {
   this.remoteEndPoint = remoteEndPoint;
@@ -17,7 +19,7 @@ YpStoreObject.prototype.insert = function (collectionName, insertData) {
   const apiData = JSON.parse(process.env.ypcontext);
   const storeSettings = {
     storeUrl: 'http://localhost:3001/api/cli/content/store/remote/objects',
-    storeReqObj: require('http'),
+    storeReqObj: httpObj,
   };
   const baseUrlParts = url.parse(storeSettings.storeUrl);
   const reqSchemeObj = storeSettings.storeReqObj;
@@ -70,7 +72,7 @@ YpStoreObject.prototype.update = function (collectionName, objectReference, upda
   const apiData = JSON.parse(process.env.ypcontext);
   const storeSettings = {
     storeUrl: 'http://localhost:3001/api/cli/content/store/remote/objects',
-    storeReqObj: require('http'),
+    storeReqObj: httpObj,
   };
   const baseUrlParts = url.parse(storeSettings.storeUrl);
   const reqSchemeObj = storeSettings.storeReqObj;
@@ -125,7 +127,7 @@ YpStoreObject.prototype.query = function (collectionName, queryData) {
   const apiData = JSON.parse(process.env.ypcontext);
   const storeSettings = {
     storeUrl: 'http://localhost:3001/api/cli/content/store/remote/objects',
-    storeReqObj: require('http'),
+    storeReqObj: httpObj,
   };
   const baseUrlParts = url.parse(storeSettings.storeUrl);
   const reqSchemeObj = storeSettings.storeReqObj;

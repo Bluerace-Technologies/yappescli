@@ -169,7 +169,6 @@ YpMysqlObject.prototype.select = function (statement, args) {
         conn.forwardOut('localhost', 3309, '127.0.0.1', 3306, (err, stream) => {
           if (err) {
             dbConnectStatus = 'false';
-            console.log(new Error(err.message));
           } else {
             const mysqlConfig = {
               host: 'localhost',

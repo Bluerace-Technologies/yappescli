@@ -17,12 +17,15 @@
         "no-plusplus": ["off", { "allowForLoopAfterthoughts": true }],
         "consistent-return": "off",
         "no-prototype-builtins": "off",
-        "no-shadow": ["error", { "allow": ["done","cb","callback","resolve","reject","data","err","updateBusinessLogicData"] }],
-        "no-unused-vars": "off",
+        "no-shadow": "off",
+        "no-unused-vars": ["error", { "varsIgnorePattern": "[self]","args": "none" }],
         "func-names": "off",
         "no-param-reassign": "off",
         "camelcase": ["error", {"allow": ["error_code","url_parts"]}],
         "max-len": ["error", { "code": 180 }],
-        "import/no-dynamic-require": "off"
+        "import/no-dynamic-require": "off",
+        "new-cap": ["error", { "newIsCap": false }],
+        "no-tabs": ["error", { "allowIndentationTabs": true }],
+        "no-useless-concat": "off"
     }
 }
