@@ -104,7 +104,6 @@ module.exports = function (processingData, callback) {
                   }
                 }
               }
-              hashArr = hashArr.reverse();
               const resourceDetails = { endpointName: listFile[fileNumber], lastModifiedDateTime: mtime, hashReference: hashArr[fileNumber] };
               apiDetails.endpointDetails.push(resourceDetails);
               fileNumber++;
@@ -147,8 +146,8 @@ module.exports = function (processingData, callback) {
           } else if (statusResponse.data[epIndex].remoteSync == 'no') {
             syncResponse += `'${statusResponse.data[epIndex].endpointName}'${customMessagesConfig().customMessages.LCCODEAHEAD.message}`;
             epIndex++;
-          } else {
-            syncResponse += statusResponse.data[epIndex].endpointName;
+          } else if(statusResponse.data[epIndex].remoteSync == 'in-sync'){
+            syncResponse += `'${statusResponse.data[epIndex].endpointName}'${customMessagesConfig().customMessages.PULL_INSYNC.message}`;
             epIndex++;
           }
           callback(null);
