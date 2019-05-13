@@ -390,7 +390,9 @@ module.exports = function (processingData, callback) {
       } else if (err.code == 1) {
         callback(customMessage(customErrorConfig().customError.EACCES));
       } else {
-        callback(customMessage(customErrorConfig().customError.APNAMEERR));
+        let serverError = customErrorConfig().customError.APNAMEERR;
+        serverError.errorMessage = err;
+        callback(customMessage(serverError));
       }
     } else {
       setTimeout(() => {
