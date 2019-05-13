@@ -1,57 +1,54 @@
-const fs = require('fs');
 const netrc = require('netrc');
-const {configs} = require('../configs/yp_configs');
-let {resolveOSCommands} = require('../utils/yp_resolve_os');
-const inquirer = require("inquirer");
+const inquirer = require('inquirer');
 const chalk = require('chalk');
-const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
-let { normalize,customMessage } = require('../utils/yp_normalize');
+const { configs } = require('../configs/yp_configs');
+const { resolveOSCommands } = require('../utils/yp_resolve_os');
+const { customErrorConfig } = require('../configs/yp_custom_error');
+const { customMessage } = require('../utils/yp_normalize');
 
-module.exports = function(processingData, callback){
-    let clock = [
-        "⠋",
-        "⠙",
-        "⠹",
-        "⠸",
-        "⠼",
-        "⠴",
-        "⠦",
-        "⠧",
-        "⠇",
-        "⠏"
-    ];
+module.exports = function (processingData, callback) {
+  const clock = [
+    '⠋',
+    '⠙',
+    '⠹',
+    '⠸',
+    '⠼',
+    '⠴',
+    '⠦',
+    '⠧',
+    '⠇',
+    '⠏',
+  ];
 
-    let counter = 0;
-    let ui = new inquirer.ui.BottomBar();
+  let counter = 0;
+  const ui = new inquirer.ui.BottomBar();
 
-    let tickInterval = setInterval(() =>{
-      ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
-    }, 250);
+  const tickInterval = setInterval(() => {
+    ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
+  }, 250);
 
-    let hostObj=configs().getHostDetails();
-    let fpath = configs().netrcPath;
-    let netrcObj = netrc();
-    let loginUser = "";
-    let commandOptions = resolveOSCommands();
+  const hostObj = configs().getHostDetails();
+  const netrcObj = netrc();
+  let loginUser = '';
 
-    ui.log.write(chalk.magenta('Checking ....'));
-    
-    if(netrcObj.hasOwnProperty(hostObj.host)){
-    	loginUser = netrcObj[hostObj.host].login;
-        setTimeout(function() {
-                clearInterval(tickInterval);
-                ui.updateBottomBar('');
-                ui.updateBottomBar(chalk.green('✓ You are Logged in. \n'));
-                ui.close();         
-                callback(null, loginUser);
-            },1000)
-    } else {
-        setTimeout(function() {
-                clearInterval(tickInterval);
-                ui.updateBottomBar('');
-                ui.updateBottomBar(chalk.green('✓ Login Required. \n'));
-                ui.close();         
-                callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
-            },1000)
-    }
-}
+  ui.log.write(chalk.magenta('Checking ....'));
+
+  if (netrcObj.hasOwnProperty(hostObj.host)) {
+    loginUser = netrcObj[hostObj.host].login;
+    setTimeout(() => {
+      clearInterval(tickInterval);
+      ui.updateBottomBar('');
+      ui.updateBottomBar(chalk.green('✓ You are Logged in. \n'));
+      ui.close();
+      callback(null, loginUser);
+    }, 1000);
+  } else {
+    setTimeout(() => {
+      clearInterval(tickInterval);
+      ui.updateBottomBar('');
+      ui.updateBottomBar(chalk.green('✓ Login Required. \n'));
+      ui.close();
+      callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
+    }, 1000);
+  }
+};

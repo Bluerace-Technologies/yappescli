@@ -1,12 +1,11 @@
 const fs = require('fs');
-exports.createWsPathFile = function() {
-    let workspacePath = {
-        "path": process.cwd() + '/ypworkspace/'
-    };
-    let path = process.env.HOME + '/.config/yappes/settings.json';
-    fs.writeFile(path, JSON.stringify(workspacePath), function(err) {
-        if (err) { return err } else {
-            return;
-        }
-    });
-}
+
+exports.createWsPathFile = function () {
+  const workspacePath = {
+    path: `${process.cwd()}/ypworkspace/`,
+  };
+  const path = `${process.env.HOME}/.config/yappes/settings.json`;
+  fs.writeFile(path, JSON.stringify(workspacePath), (err) => {
+    if (err) { return err; }
+  });
+};

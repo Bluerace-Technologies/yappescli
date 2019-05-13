@@ -1,60 +1,58 @@
-const fs = require('fs');
 const netrc = require('netrc');
-const { configs } = require('../configs/yp_configs');
-let ypRequest = require('../utils/yp_request');
-let { resolveOSCommands } = require('../utils/yp_resolve_os');
-const inquirer = require("inquirer");
+const inquirer = require('inquirer');
 const chalk = require('chalk');
+const { configs } = require('../configs/yp_configs');
+const ypRequest = require('../utils/yp_request');
 
-module.exports = function(processingData, callback) {
-    let fpath = configs().netrcPath;
-    let hostObj = configs().getHostDetails();
-    let netrcObj = netrc();
-    let data = {
-        emailId: processingData.username,
-        password: processingData.password
-    };
 
-    let clock = [
-        "⠋",
-        "⠙",
-        "⠹",
-        "⠸",
-        "⠼",
-        "⠴",
-        "⠦",
-        "⠧",
-        "⠇",
-        "⠏"
-    ];
+module.exports = function (processingData, callback) {
+  const hostObj = configs().getHostDetails();
+  const netrcObj = netrc();
+  const data = {
+    emailId: processingData.username,
+    password: processingData.password,
+  };
 
-    let counter = 0;
-    let ui = new inquirer.ui.BottomBar();
+  const clock = [
+    '⠋',
+    '⠙',
+    '⠹',
+    '⠸',
+    '⠼',
+    '⠴',
+    '⠦',
+    '⠧',
+    '⠇',
+    '⠏',
+  ];
 
-    let tickInterval = setInterval(() => {
-        ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
-    }, 250);
+  let counter = 0;
+  const ui = new inquirer.ui.BottomBar();
 
-    ypRequest.cliLogin(processingData.endPointPath, "post", data, function(err, apiResponse) {
-        ui.log.write(chalk.green('✓ Execution starts....'));
-        if (err) {
-            ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
-            clearInterval(tickInterval);
-            ui.close();
-            callback(err);
-        } else {
-            netrcObj[hostObj.host] = {
-                login: processingData.username,
-                password: apiResponse.data.ypToken
-            };
-            netrc.save(netrcObj);
-            setTimeout(function() {
-                clearInterval(tickInterval);
-                ui.updateBottomBar('');
-                ui.updateBottomBar(chalk.green('✓ Login completed. \n'));
-                ui.close();
-                callback(null, "Successfully authenticated!!");
-            }, 1000)
-        }
-    });
-}
+  const tickInterval = setInterval(() => {
+    ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
+  }, 250);
+
+  ypRequest.cliLogin(processingData.endPointPath, 'post', data, (err, apiResponse) => {
+    ui.log.write(chalk.green('✓ Execution starts....'));
+    if (err) {
+      ui.updateBottomBar(chalk.bgRedBright('✗ Failed...'));
+      clearInterval(tickInterval);
+      ui.close();
+      callback(err);
+    } else {
+      netrcObj[hostObj.host] = {
+        login: processingData.username,
+        password: apiResponse.data.ypToken,
+      };
+      netrc.save(netrcObj);
+      setTimeout(() => {
+        clearInterval(tickInterval);
+        ui.updateBottomBar('');
+        ui.updateBottomBar(chalk.green('✓ Login completed. \n'));
+        ui.close();
+        callback(null, 'Successfully authenticated!!');
+      }, 1000);
+    }
+  });
+};

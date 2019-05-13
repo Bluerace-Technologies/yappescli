@@ -1,58 +1,54 @@
-const fs = require('fs');
 const netrc = require('netrc');
-const {configs} = require('../configs/yp_configs');
-let {resolveOSCommands} = require('../utils/yp_resolve_os');
-const inquirer = require("inquirer");
+const inquirer = require('inquirer');
 const chalk = require('chalk');
-const { customErrorConfig, customMessagesConfig } = require('../configs/yp_custom_error');
-let { normalize,customMessage } = require('../utils/yp_normalize');
+const { configs } = require('../configs/yp_configs');
+const { customErrorConfig } = require('../configs/yp_custom_error');
+const { customMessage } = require('../utils/yp_normalize');
 
 
-module.exports = function(processingData, callback){
-    let fpath = configs().netrcPath;
-    let hostObj=configs().getHostDetails();
-    let netrcObj = netrc();
-    let loginUser = "";
+module.exports = function (processingData, callback) {
+  const hostObj = configs().getHostDetails();
+  const netrcObj = netrc();
 
-    let clock = [
-        "⠋",
-        "⠙",
-        "⠹",
-        "⠸",
-        "⠼",
-        "⠴",
-        "⠦",
-        "⠧",
-        "⠇",
-        "⠏"
-    ];
+  const clock = [
+    '⠋',
+    '⠙',
+    '⠹',
+    '⠸',
+    '⠼',
+    '⠴',
+    '⠦',
+    '⠧',
+    '⠇',
+    '⠏',
+  ];
 
-    let counter = 0;
-    let ui = new inquirer.ui.BottomBar();
+  let counter = 0;
+  const ui = new inquirer.ui.BottomBar();
 
-    let tickInterval = setInterval(() =>{
-      ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
-    }, 250);
+  const tickInterval = setInterval(() => {
+    ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
+  }, 250);
 
-    ui.log.write(chalk.green('✓ Execution starts....'));
+  ui.log.write(chalk.green('✓ Execution starts....'));
 
-    if(netrcObj.hasOwnProperty(hostObj.host)){
-    	delete netrcObj[hostObj.host];
-    	netrc.save(netrcObj);
-        setTimeout(function() {
-                clearInterval(tickInterval);
-                ui.updateBottomBar('');
-                ui.updateBottomBar(chalk.green('✓ You are Logging out Please Wait. \n'));
-                ui.close();         
-                callback(null, "Logout done!!");
-            },1000)
-    } else {
-        setTimeout(function() {
-                clearInterval(tickInterval);
-                ui.updateBottomBar('');
-                ui.updateBottomBar(chalk.green('✓ Login Required. \n'));
-                ui.close();         
-                callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
-            },1000)
-    }
-}
+  if (netrcObj.hasOwnProperty(hostObj.host)) {
+    delete netrcObj[hostObj.host];
+    netrc.save(netrcObj);
+    setTimeout(() => {
+      clearInterval(tickInterval);
+      ui.updateBottomBar('');
+      ui.updateBottomBar(chalk.green('✓ You are Logging out Please Wait. \n'));
+      ui.close();
+      callback(null, 'Logout done!!');
+    }, 1000);
+  } else {
+    setTimeout(() => {
+      clearInterval(tickInterval);
+      ui.updateBottomBar('');
+      ui.updateBottomBar(chalk.green('✓ Login Required. \n'));
+      ui.close();
+      callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
+    }, 1000);
+  }
+};

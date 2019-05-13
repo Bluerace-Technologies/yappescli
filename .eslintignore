@@ -1,0 +1,5 @@
+# test file ignore
+/app/tests/*.js
+
+# custom-file to ignore
+/app/template/logic_template.js
