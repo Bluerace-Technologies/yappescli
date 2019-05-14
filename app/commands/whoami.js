@@ -1,6 +1,6 @@
-const netrc = require('netrc');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
+const netrc = require('../utils/netrc');
 const { configs } = require('../configs/yp_configs');
 const { resolveOSCommands } = require('../utils/yp_resolve_os');
 const { customErrorConfig } = require('../configs/yp_custom_error');

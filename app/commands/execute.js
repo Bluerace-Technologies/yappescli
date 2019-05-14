@@ -1,5 +1,4 @@
 const fs = require('fs');
-const netrc = require('netrc');
 const async = require('async');
 const nodeCmd = require('node-cmd');
 const http = require('http');
@@ -8,6 +7,7 @@ const url = require('url');
 const qs = require('qs');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
+const netrc = require('../utils/netrc');
 const {
   normalize, customMessage, invalidName,
 } = require('../utils/yp_normalize');

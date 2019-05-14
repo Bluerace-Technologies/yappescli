@@ -1,6 +1,6 @@
 const request = require('request');
-const netrc = require('netrc');
 const { configs } = require('../configs/yp_configs');
+const netrc = require('../utils/netrc');
 const { customErrorConfig } = require('../configs/yp_custom_error');
 
 exports.call = function (endPointPath, operation, data, callback) {
