@@ -1,4 +1,4 @@
-/* eslint no-console: "off" */
+
 const fs = require('fs');
 const isWsl = require('is-wsl');
 const nodeCmd = require('node-cmd');
