@@ -8,9 +8,9 @@ const inquirer = require('inquirer');
 const chalk = require('chalk');
 const { customMessage } = require('./utils/yp_normalize');
 const { customErrorConfig } = require('./configs/yp_custom_error');
-const { configs } = require('../configs/yp_configs');
+const { configs } = require('./configs/yp_configs');
 
-const logDir = `${process.env.HOME}/${configs.configBase}/logs`;
+const logDir = `${process.env.HOME}/${configs().configBase}/logs`;
 
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);

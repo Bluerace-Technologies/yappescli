@@ -12,9 +12,10 @@ const loginQuestion = [{
   message: 'Enter your email address',
 },
 {
-  type: 'input',
+  type: 'password',
   name: 'password',
   message: 'Enter your password',
+  mask: true
 },
 ];
 

@@ -1,9 +1,9 @@
 const fs = require('fs');
-const netrc = require('netrc');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const util = require('util');
 const async = require('async');
+const netrc = require('../utils/netrc');
 const { configs } = require('../configs/yp_configs');
 const ypRequest = require('../utils/yp_request');
 const { normalize, customMessage, invalidName } = require('../utils/yp_normalize');

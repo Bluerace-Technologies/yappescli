@@ -1,8 +1,7 @@
 const url = require('url');
-const netrc = require('netrc');
 const httpObj = require('http');
 const { configs } = require('../configs/yp_configs');
-
+const netrc = require('../utils/netrc');
 
 function YpStoreObject(remoteEndPoint) {
   this.remoteEndPoint = remoteEndPoint;

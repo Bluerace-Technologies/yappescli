@@ -1,12 +1,12 @@
 const fs = require('fs');
 const async = require('async');
 const isWsl = require('is-wsl');
-const netrc = require('netrc');
 const nodeCmd = require('node-cmd');
 
 const settingFileName = '.ypsettings.json';
 const inquirer = require('inquirer');
 const chalk = require('chalk');
+const netrc = require('../utils/netrc');
 const { normalize, customMessage } = require('../utils/yp_normalize');
 const { resolveOSCommands } = require('../utils/yp_resolve_os');
 const ypRequest = require('../utils/yp_request');
@@ -140,7 +140,7 @@ function createWsPath(path, callback) {
   const workspacePath = {
     path: `${process.cwd()}/ypworkspace/`,
   };
-  const configPath = `${process.env.HOME}/${configs.configBase}`;
+  const configPath = `${process.env.HOME}/${configs().configBase}`;
   const cmd = `${commandOptions['create-dir']} -p ${configPath}`;
   nodeCmd.get(cmd, (err, data) => {
     if (err) {
@@ -252,7 +252,7 @@ module.exports = function (processingData, callback) {
       configs().getConfigSettings((err, data) => {
         if (err) {
           if (err.errno == -2) {
-            const path = `${process.env.HOME}/${configs.configBase}/settings.json`;
+            const path = `${process.env.HOME}/${configs().configBase}/settings.json`;
             createWsPath(path, (err, workspacePath) => {
               if (err) {
                 callback(err);

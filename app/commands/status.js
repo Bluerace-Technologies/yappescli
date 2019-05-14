@@ -1,10 +1,10 @@
 const fs = require('fs');
-const netrc = require('netrc');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const util = require('util');
 const async = require('async');
 
+const netrc = require('../utils/netrc');
 const { configs } = require('../configs/yp_configs');
 const { resolveOSCommands } = require('../utils/yp_resolve_os');
 const {

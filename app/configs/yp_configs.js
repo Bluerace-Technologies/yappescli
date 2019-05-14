@@ -1,4 +1,5 @@
 const fs = require('fs');
+const netrc = require('../utils/netrc');
 
 exports.configs = function configs() {
   return {
@@ -14,17 +15,17 @@ exports.configs = function configs() {
       } else {
         hostDetails = {
           host: 'cli.yappes.com',
-          port: 80,
-          scheme: 'https',
+          port: 98,
+          scheme: 'http',
           basePath: '/api',
         };
       }
       return hostDetails;
     },
-    netrcPath: `${process.env.HOME}/.netrc`,
-    configBase: ".config/yappes",
+    netrcPath: netrc.getFilePath(),
+    configBase: ".yappes",
     getConfigSettings(callback) {
-      const configSettingPath = `${process.env.HOME}/.config/yappes/settings.json`;
+      const configSettingPath = `${process.env.HOME}/.yappes/settings.json`;
       fs.readFile(configSettingPath, 'utf8', (err, data) => {
         if (err) {
           callback(err);
