@@ -3,3 +3,4 @@
 
 # custom-file to ignore
 /app/template/logic_template.js
+/app/utils/netrc.js

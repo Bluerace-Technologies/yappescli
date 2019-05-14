@@ -75,7 +75,7 @@ function appendSettingsFile(apiHashDetails, workspace, callback) {
           yappesUrls: apiHashDetails.apiDetails.urls,
           remoteEndpoints: apiHashDetails.apiDetails.remoteEndpoints,
           endPointReferences: [],
-        }
+        },
       };
       let apiCount = 0;
       for (let i = 0; i < apiHashDetails.endpointDetails.length; i++) {

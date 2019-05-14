@@ -23,7 +23,7 @@ exports.configs = function configs() {
       return hostDetails;
     },
     netrcPath: netrc.getFilePath(),
-    configBase: ".yappes",
+    configBase: '.yappes',
     getConfigSettings(callback) {
       const configSettingPath = `${process.env.HOME}/.yappes/settings.json`;
       fs.readFile(configSettingPath, 'utf8', (err, data) => {

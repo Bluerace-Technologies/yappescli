@@ -15,7 +15,7 @@ const loginQuestion = [{
   type: 'password',
   name: 'password',
   message: 'Enter your password',
-  mask: true
+  mask: true,
 },
 ];
 
