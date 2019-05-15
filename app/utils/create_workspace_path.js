@@ -8,16 +8,18 @@ const netrc = require('../utils/netrc');
 const { resolveOSCommands } = require('../utils/yp_resolve_os');
 
 function createYpConfig() {
-  const configPath = `${process.env.HOME}/${configs().configBase}`;
+  let configPath = `${process.env.HOME}${configs().getDelimiter()}${configs().configBase}`;
+  console.log(configPath);
   let settingsFilePath = '';
   const commandOptions = resolveOSCommands();
   const workspacePath = {
     path: '',
   };
-  settingsFilePath = `${configPath}/settings.json`;
+  settingsFilePath = `${configPath}${configs().getDelimiter()}settings.json`;
   async.series([
     function (callback) {
-      const cmd = `${commandOptions['create-dir']} -p ${configPath}`;
+      let cmd = `${commandOptions['create-dir']} ${configPath}`;
+            
       nodeCmd.get(cmd, (err, data) => {
         if (err) {
           callback(err);
@@ -43,7 +45,7 @@ function createYpConfig() {
         fileName = '.netrc';
       }
       const netrcFile = netrc.getFilePath();
-      const homePath = `${process.env.HOME}/${fileName}`;
+      const homePath = `${process.env.HOME}${configs().getDelimiter()}${fileName}`;
       if (Object.keys(netrcFile).length === 0) {
         const cmd = `${commandOptions['create-file']} ${homePath}`;
         nodeCmd.get(cmd, (err, data) => {

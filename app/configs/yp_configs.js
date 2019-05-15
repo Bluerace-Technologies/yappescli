@@ -14,8 +14,8 @@ exports.configs = function configs() {
         };
       } else {
         hostDetails = {
-          host: 'cli.yappes.com',
-          port: 98,
+          host: '192.168.1.9',
+          port: 3001,
           scheme: 'http',
           basePath: '/api',
         };
@@ -24,8 +24,15 @@ exports.configs = function configs() {
     },
     netrcPath: netrc.getFilePath(),
     configBase: '.yappes',
+    getDelimiter() {
+      if (process.platform == 'win32' || isWsl) {
+       return '\\';
+       } else {
+        return '/';
+       }
+    },
     getConfigSettings(callback) {
-      const configSettingPath = `${process.env.HOME}/.yappes/settings.json`;
+      const configSettingPath = `${process.env.HOME||process.env.USERPROFILE}\\.yappes\\settings.json`;
       fs.readFile(configSettingPath, 'utf8', (err, data) => {
         if (err) {
           callback(err);

@@ -5,7 +5,7 @@ exports.resolveOSCommands = function resolveOSCommands() {
 
   if (process.platform == 'darwin') {
     commandOptions = {
-      'create-dir': 'mkdir',
+      'create-dir': 'mkdir -p',
       'delete-dir': 'rmdir',
       'create-file': 'touch',
       'delete-file': 'rm',
@@ -21,7 +21,7 @@ exports.resolveOSCommands = function resolveOSCommands() {
     };
   } else {
     commandOptions = {
-      'create-dir': 'mkdir',
+      'create-dir': 'mkdir -p',
       'delete-dir': 'rmdir',
       'create-file': 'touch',
       'delete-file': 'rm',

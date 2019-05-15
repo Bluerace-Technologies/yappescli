@@ -55,14 +55,14 @@ module.exports = function (processingData, callback) {
         if (err) {
           callback(err);
         } else {
-          workspacePath = JSON.parse(data).path;
-          path = `${workspacePath + normalize(processingData.apiName)}/endpoints/`;
+          workspacePath =  decodeURIComponent(JSON.parse(data).path);
+          path = `${workspacePath + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
           callback(null);
         }
       });
     },
     function (callback) {
-      fs.readFile(`${workspacePath}/.ypsettings.json`, 'utf8', (err, data) => {
+      fs.readFile(`${workspacePath}${configs().getDelimiter()}.ypsettings.json`, 'utf8', (err, data) => {
         if (err) {
           const error_code = 3000;
           if (err.errno == -2) {

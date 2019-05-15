@@ -10,8 +10,7 @@ const { customMessage } = require('./utils/yp_normalize');
 const { customErrorConfig } = require('./configs/yp_custom_error');
 const { configs } = require('./configs/yp_configs');
 
-const logDir = `${process.env.HOME}/${configs().configBase}/logs`;
-
+const logDir = `${process.env.HOME||process.env.USERPROFILE}${configs().getDelimiter()}${configs().configBase}/logs`;
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir);
 }
@@ -61,6 +60,7 @@ YappesCliProcessor.prototype.loadCommand = function (command) {
     require.resolve(self.resolvePath + command);
     return require(self.resolvePath + command);
   } catch (e) {
+    console.log(e);
     return false;
   }
 };

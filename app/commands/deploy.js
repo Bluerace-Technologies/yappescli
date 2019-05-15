@@ -61,8 +61,8 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            pathEndPoint = `${JSON.parse(data).path + normalize(processingData.apiName)}/endpoints/`;
-            pathYpSetting = `${JSON.parse(data).path}.ypsettings.json`;
+            pathEndPoint = `${ decodeURIComponent(JSON.parse(data).path) + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
+            pathYpSetting = `${decodeURIComponent(JSON.parse(data).path)}.ypsettings.json`;
             businesslogicFile = `${pathEndPoint + normalize(processingData.endPointName)}.js`;
             ui.log.write(chalk.green('✓ Execution starts....'));
             callback(null);
@@ -136,8 +136,10 @@ module.exports = function (processingData, callback) {
       });
     },
     function (updateBusinessLogicData, callback) {
+      console.log(updateBusinessLogicData);
       const endPointPath = `/cli/resource/businesslogic/${processingData.apiName}`;
       ypRequest.call(endPointPath, 'put', updateBusinessLogicData, (err, statusResponse) => {
+        console.log(statusResponse);
         if (err) {
           callback(err);
         } else if (statusResponse.code == 200) {

@@ -127,6 +127,7 @@ module.exports = function (processingData, callback) {
   if (envRunList.indexOf(processingData.run) < 0) {
     return callback(customMessage(customErrorConfig().customError.RNERR));
   }
+  console.log(processingData);
   if (processingData.run.toLowerCase() == 'local') {
     async.waterfall([
       function (callback) {
@@ -134,10 +135,10 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            workspacePath = JSON.parse(data).path;
-            apiNamePath = JSON.parse(data).path + normalize(processingData.apiName);
-            pathEndPoint = `${JSON.parse(data).path + normalize(processingData.apiName)}/endpoints/`;
-            pathYpSetting = `${JSON.parse(data).path}.ypsettings.json`;
+            workspacePath =  decodeURIComponent(JSON.parse(data).path);
+            apiNamePath = workspacePath + normalize(processingData.apiName);
+            pathEndPoint = `${workspacePath + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
+            pathYpSetting = `${workspacePath}.ypsettings.json`;
             businesslogicFile = `${pathEndPoint + normalize(processingData.endPointName)}.js`;
             callback(null);
           }
@@ -323,6 +324,7 @@ module.exports = function (processingData, callback) {
   } else if (processingData.run.toLowerCase() == 'remote') {
     async.waterfall([
       function (callback) {
+        console.log("remote");
         fs.readFile(processingData.configFile, 'utf8', (err, data) => {
           if (err) {
             if (err.errno == -2) {
@@ -364,6 +366,7 @@ module.exports = function (processingData, callback) {
       function (status, callback) {
         let localAhead = false; // local is ahead;
         let epExist = false; // wrong name passed
+        console.log(status);
         status.data.forEach((epStatus) => {
           if (processingData.endPointName == epStatus.endpointName) {
             epExist = true;
@@ -391,13 +394,14 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            const pathYpSetting = `${JSON.parse(data).path}.ypsettings.json`;
+            const pathYpSetting = `${decodeURIComponent(JSON.parse(data).path)}.ypsettings.json`;
             callback(null, pathYpSetting);
           }
         });
       },
       function (pathYpSetting, callback) {
         fs.readFile(pathYpSetting, 'utf8', (err, data) => {
+            console.log(data);
           if (err) {
             if (err.errno == -2) {
               callback(customMessage(customErrorConfig().customError.ENOENT));
@@ -408,12 +412,15 @@ module.exports = function (processingData, callback) {
             }
           } else {
             const ypSettings = JSON.parse(data);
+            console.log("415");
+            console.log(ypsettings);
             const yappesEndpointConfig = {
               url: '',
               endPoint: '',
               method: '',
             };
             ypSettings.apiReferences.forEach((apiRef) => {
+                console.log(apiRef);
               if (processingData.apiName == apiRef.apiName) {
                 yappesEndpointConfig.url = apiRef.yappesUrls;
                 apiRef.endPointReferences.forEach((endpoints) => {
@@ -424,11 +431,15 @@ module.exports = function (processingData, callback) {
                 });
               }
             });
+                      console.log(yappesEndpointConfig);
+          console.log("431");
             callback(null, yappesEndpointConfig);
           }
         });
       },
       function (yappesEndpointConfig, callback) {
+                  console.log(yappesEndpointConfig);
+          console.log("436");
         if (yappesEndpointConfig.endPoint.includes('{') || yappesEndpointConfig.endPoint.includes('}')) {
           const endpointArr = yappesEndpointConfig.endPoint.split('/');
           const pathParamsList = Object.keys(processingData.pathParameters);
