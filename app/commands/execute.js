@@ -134,10 +134,10 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            workspacePath = JSON.parse(data).path;
-            apiNamePath = JSON.parse(data).path + normalize(processingData.apiName);
-            pathEndPoint = `${JSON.parse(data).path + normalize(processingData.apiName)}/endpoints/`;
-            pathYpSetting = `${JSON.parse(data).path}.ypsettings.json`;
+            workspacePath = decodeURIComponent(JSON.parse(data).path);
+            apiNamePath = workspacePath + normalize(processingData.apiName);
+            pathEndPoint = `${workspacePath + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
+            pathYpSetting = `${workspacePath}.ypsettings.json`;
             businesslogicFile = `${pathEndPoint + normalize(processingData.endPointName)}.js`;
             callback(null);
           }
@@ -204,14 +204,17 @@ module.exports = function (processingData, callback) {
               if (err) {
                 callback(customMessage(customErrorConfig().customError.EOPNOTSUPP));
               } else {
-                callback(null, nodeModulePath.trim());
+                nodeModulePath = nodeModulePath.trim();
+                nodeModulePath = nodeModulePath.replace(/\\/g, '\\\\');
+                callback(null, nodeModulePath);
               }
             });
           },
           function (nodeModulePath, callback) {
             let remoteSetArray = JSON.parse(process.env.ypcontext);
             remoteSetArray = remoteSetArray.ypsettings;
-            fs.readFile(`${__dirname}/../template/logic_template.js`, 'UTF-8', (err, logicTemplateScript) => {
+            fs.readFile(`${__dirname}${configs().getDelimiter()}..${configs().getDelimiter()}template`
+              + `${configs().getDelimiter()}logic_template.js`, 'UTF-8', (err, logicTemplateScript) => {
               if (err) {
                 callback(err);
               } else {
@@ -266,7 +269,7 @@ module.exports = function (processingData, callback) {
             });
           },
           function (logic, callback) {
-            const tempFile = `${apiNamePath}/temp.js`;
+            const tempFile = `${apiNamePath}${configs().getDelimiter()}temp.js`;
             fs.writeFile(tempFile, logic, (err) => {
               if (err) {
                 callback(customMessage(customErrorConfig().customError.EOPNOTSUPP));
@@ -391,7 +394,7 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            const pathYpSetting = `${JSON.parse(data).path}.ypsettings.json`;
+            const pathYpSetting = `${decodeURIComponent(JSON.parse(data).path)}.ypsettings.json`;
             callback(null, pathYpSetting);
           }
         });

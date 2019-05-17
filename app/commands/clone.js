@@ -138,10 +138,10 @@ function fetchWorkspacePath(path, callback) {
 function createWsPath(path, callback) {
   const commandOptions = resolveOSCommands();
   const workspacePath = {
-    path: `${process.cwd()}/ypworkspace/`,
+    path: encodeURIComponent(`${process.cwd()}${configs().getDelimiter()}ypworkspace${configs().getDelimiter()}`),
   };
-  const configPath = `${process.env.HOME}/${configs().configBase}`;
-  const cmd = `${commandOptions['create-dir']} -p ${configPath}`;
+  const configPath = `${process.env.HOME || process.env.USERPROFILE}${configs().getDelimiter()}${configs().configBase}`;
+  const cmd = `${commandOptions['create-dir']} ${configPath}`;
   nodeCmd.get(cmd, (err, data) => {
     if (err) {
       callback(err);
@@ -160,13 +160,13 @@ function createWsPath(path, callback) {
 function createYpClasses(workspace, apiHashDetails, callback) {
   const path = workspace;
   const commandOptions = resolveOSCommands();
-  const touchCmd = `${commandOptions['create-dir']} -p ${path}/${normalize(apiHashDetails.apiDetails.apiName)}/test`;
+  const touchCmd = `${commandOptions['create-dir']} ${path}${configs().getDelimiter()}${normalize(apiHashDetails.apiDetails.apiName)}${configs().getDelimiter()}test`;
   nodeCmd.get(touchCmd, (err, data) => {
     if (err) {
       callback(err);
     } else {
       async.waterfall([function (callback) {
-        fs.readFile(`${__dirname}/../tests/reqresdata.js`, 'UTF-8', (err, data) => {
+        fs.readFile(`${__dirname}${configs().getDelimiter()}..${configs().getDelimiter()}tests${configs().getDelimiter()}reqresdata.js`, 'UTF-8', (err, data) => {
           if (err) {
             callback(err);
           } else {
@@ -175,7 +175,7 @@ function createYpClasses(workspace, apiHashDetails, callback) {
         });
       }, function (fileData, callback) {
         const reqResObject = fileData;
-        fs.writeFile(`${path + normalize(apiHashDetails.apiDetails.apiName)}/test/` + 'executestub.js', reqResObject, (err) => {
+        fs.writeFile(`${path + normalize(apiHashDetails.apiDetails.apiName)}${configs().getDelimiter()}test${configs().getDelimiter()}` + 'executestub.js', reqResObject, (err) => {
           if (err) {
             callback(err);
           } else {
@@ -252,12 +252,12 @@ module.exports = function (processingData, callback) {
       configs().getConfigSettings((err, data) => {
         if (err) {
           if (err.errno == -2) {
-            const path = `${process.env.HOME}/${configs().configBase}/settings.json`;
+            const path = `${process.env.HOME || process.env.USERPROFILE}${configs().getDelimiter()}${configs().configBase}${configs().getDelimiter()}settings.json`;
             createWsPath(path, (err, workspacePath) => {
               if (err) {
                 callback(err);
               } else {
-                workspace = workspacePath;
+                workspace = decodeURIComponent(workspacePath);
                 callback(null);
               }
             });
@@ -265,8 +265,23 @@ module.exports = function (processingData, callback) {
             callback(err);
           }
         } else {
-          workspace = JSON.parse(data).path;
-          callback(null);
+          workspace = decodeURIComponent(JSON.parse(data).path);
+          if (!workspace || workspace.length == 0) {
+            const path = `${process.env.HOME || process.env.USERPROFILE}${configs().getDelimiter()}${configs().configBase}${configs().getDelimiter()}settings.json`;
+            const workspacePath = {
+              path: encodeURIComponent(`${process.cwd()}${configs().getDelimiter()}ypworkspace${configs().getDelimiter()}`),
+            };
+            fs.writeFile(path, JSON.stringify(workspacePath), (err) => {
+              if (err) {
+                callback(err);
+              } else {
+                workspace = decodeURIComponent(workspacePath.path);
+                callback(null);
+              }
+            });
+          } else {
+            callback(null);
+          }
         }
       });
     },
@@ -280,7 +295,7 @@ module.exports = function (processingData, callback) {
     },
     function (callback) {
       delete processingData.endPointPath;
-      const endPointPath = `/cli/clone/apidefinitions/${loginUser}`;
+      const endPointPath = `${configs().getDelimiter()}cli${configs().getDelimiter()}clone${configs().getDelimiter()}apidefinitions/${loginUser}`;
       ypRequest.call(endPointPath, 'post', processingData, (err, apiResponse) => {
         if (err) {
           callback(err);
@@ -296,9 +311,29 @@ module.exports = function (processingData, callback) {
       });
     },
     function (apiResponse, callback) {
+      if (process.platform == 'win32' || isWsl) {
+        if (fs.existsSync(`${workspace + normalize(apiResponse.data.apiDetails.apiName)}`)) {
+          let delCmd = `${commandOptions['delete-dir']} /Q /S `;
+          const path = `${workspace + normalize(apiResponse.data.apiDetails.apiName)}${configs().getDelimiter()}`;
+          delCmd += path;
+          nodeCmd.get(delCmd, (err, data) => {
+            if (err) {
+              callback(err);
+            } else {
+              callback(null, apiResponse);
+            }
+          });
+        } else {
+          callback(null, apiResponse);
+        }
+      } else {
+        callback(null, apiResponse);
+      }
+    },
+    function (apiResponse, callback) {
       let index = 0;
-      let cmd = `${commandOptions['create-dir']} -p `;
-      const path = `${workspace + normalize(apiResponse.data.apiDetails.apiName)}/endpoints`;
+      let cmd = `${commandOptions['create-dir']} `;
+      const path = `${workspace + normalize(apiResponse.data.apiDetails.apiName)}${configs().getDelimiter()}endpoints`;
       cmd += path;
       nodeCmd.get(cmd, (err, data) => {
         if (err) {
@@ -306,7 +341,7 @@ module.exports = function (processingData, callback) {
         } else {
           async.whilst(() => index < apiResponse.data.endpointDetails.length,
             (callback) => {
-              const touchCmd = `${commandOptions['create-file']} ${path}/${normalize(apiResponse.data.endpointDetails[index].endPointName)}.js`;
+              const touchCmd = `${commandOptions['create-file']} ${path}${configs().getDelimiter()}${normalize(apiResponse.data.endpointDetails[index].endPointName)}.js`;
               nodeCmd.get(touchCmd, (err, data) => {
                 if (err) {
                   callback(err);
@@ -373,7 +408,9 @@ module.exports = function (processingData, callback) {
       });
     },
     function (result, callback) {
-      const configFilePath = `${workspace}/${normalize(apiHashDetails.apiDetails.apiName)}/test/runtime_config.json`;
+      const configFilePath = `${workspace}${configs().getDelimiter()}`
+      + `${normalize(apiHashDetails.apiDetails.apiName)}`
+      + `${configs().getDelimiter()}test${configs().getDelimiter()}runtime_config.json`;
       createRuntimeConfig(apiHashDetails, configFilePath, (err) => {
         if (err) {
           callback(err);
@@ -401,7 +438,7 @@ module.exports = function (processingData, callback) {
         ui.updateBottomBar('');
         ui.updateBottomBar(chalk.green('✓ Clone command execution completed \n'));
         ui.updateBottomBar(chalk.green('"ypworkspace" folder is created in the current directory for you'
-          + ' to work on the business logic.\n For details refer https://docs.yappes.com/cli_tool_clone \n'));
+                    + ' to work on the business logic.\n For details refer https://docs.yappes.com/cli_tool_clone \n'));
         ui.close();
         callback(null, res);
       }, 1000);

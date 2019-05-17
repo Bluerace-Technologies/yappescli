@@ -74,9 +74,9 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            workspacePath = JSON.parse(data).path;
-            pathEndPoint = `${JSON.parse(data).path + normalize(processingData.apiName)}/endpoints/`;
-            pathYpSetting = `${JSON.parse(data).path}.ypsettings.json`;
+            workspacePath = decodeURIComponent(JSON.parse(data).path);
+            pathEndPoint = `${workspacePath + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
+            pathYpSetting = `${workspacePath}.ypsettings.json`;
             ui.log.write(chalk.green('✓ Execution starts....'));
             callback(null);
           }
@@ -86,9 +86,9 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            workspacePath = JSON.parse(data).path;
-            pathEndPoint = `${JSON.parse(data).path + normalize(processingData.apiName)}/endpoints/`;
-            pathYpSetting = `${JSON.parse(data).path}.ypsettings.json`;
+            workspacePath = decodeURIComponent(JSON.parse(data).path);
+            pathEndPoint = `${workspacePath + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
+            pathYpSetting = `${workspacePath}.ypsettings.json`;
             endPointFile = `${pathEndPoint + normalize(processingData.endPointName)}.js`;
             ui.log.write(chalk.green('✓ Execution starts....'));
             callback(null);

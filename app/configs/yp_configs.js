@@ -1,4 +1,5 @@
 const fs = require('fs');
+const isWsl = require('is-wsl');
 const netrc = require('../utils/netrc');
 
 exports.configs = function configs() {
@@ -14,8 +15,8 @@ exports.configs = function configs() {
         };
       } else {
         hostDetails = {
-          host: 'cli.yappes.com',
-          port: 98,
+          host: '192.168.1.7',
+          port: 3001,
           scheme: 'http',
           basePath: '/api',
         };
@@ -24,8 +25,20 @@ exports.configs = function configs() {
     },
     netrcPath: netrc.getFilePath(),
     configBase: '.yappes',
+    getDelimiter() {
+      if (process.platform == 'win32' || isWsl) {
+        return '\\';
+      }
+      return '/';
+    },
     getConfigSettings(callback) {
-      const configSettingPath = `${process.env.HOME}/.yappes/settings.json`;
+      let settingsString = '';
+      if (process.platform == 'win32' || isWsl) {
+        settingsString = '\\.yappes\\settings.json';
+      } else {
+        settingsString = '/.yappes/settings.json';
+      }
+      const configSettingPath = `${process.env.HOME || process.env.USERPROFILE}${settingsString}`;
       fs.readFile(configSettingPath, 'utf8', (err, data) => {
         if (err) {
           callback(err);
