@@ -136,10 +136,8 @@ module.exports = function (processingData, callback) {
       });
     },
     function (updateBusinessLogicData, callback) {
-      console.log(updateBusinessLogicData);
       const endPointPath = `/cli/resource/businesslogic/${processingData.apiName}`;
       ypRequest.call(endPointPath, 'put', updateBusinessLogicData, (err, statusResponse) => {
-        console.log(statusResponse);
         if (err) {
           callback(err);
         } else if (statusResponse.code == 200) {

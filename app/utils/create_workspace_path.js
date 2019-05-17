@@ -9,7 +9,6 @@ const { resolveOSCommands } = require('../utils/yp_resolve_os');
 
 function createYpConfig() {
   let configPath = `${process.env.HOME}${configs().getDelimiter()}${configs().configBase}`;
-  console.log(configPath);
   let settingsFilePath = '';
   const commandOptions = resolveOSCommands();
   const workspacePath = {
