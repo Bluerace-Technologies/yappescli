@@ -61,7 +61,7 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            pathEndPoint = `${ decodeURIComponent(JSON.parse(data).path) + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
+            pathEndPoint = `${decodeURIComponent(JSON.parse(data).path) + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
             pathYpSetting = `${decodeURIComponent(JSON.parse(data).path)}.ypsettings.json`;
             businesslogicFile = `${pathEndPoint + normalize(processingData.endPointName)}.js`;
             ui.log.write(chalk.green('✓ Execution starts....'));

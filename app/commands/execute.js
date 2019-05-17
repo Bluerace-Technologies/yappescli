@@ -134,7 +134,7 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            workspacePath =  decodeURIComponent(JSON.parse(data).path);
+            workspacePath = decodeURIComponent(JSON.parse(data).path);
             apiNamePath = workspacePath + normalize(processingData.apiName);
             pathEndPoint = `${workspacePath + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
             pathYpSetting = `${workspacePath}.ypsettings.json`;

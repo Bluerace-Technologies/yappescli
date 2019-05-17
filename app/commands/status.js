@@ -55,7 +55,7 @@ module.exports = function (processingData, callback) {
         if (err) {
           callback(err);
         } else {
-          workspacePath =  decodeURIComponent(JSON.parse(data).path);
+          workspacePath = decodeURIComponent(JSON.parse(data).path);
           path = `${workspacePath + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
           callback(null);
         }

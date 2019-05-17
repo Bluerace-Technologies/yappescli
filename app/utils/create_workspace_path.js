@@ -17,8 +17,8 @@ function createYpConfig() {
   settingsFilePath = `${configPath}${configs().getDelimiter()}settings.json`;
   async.series([
     function (callback) {
-      let cmd = `${commandOptions['create-dir']} ${configPath}`;
-            
+      const cmd = `${commandOptions['create-dir']} ${configPath}`;
+
       nodeCmd.get(cmd, (err, data) => {
         if (err) {
           callback(err);
