@@ -204,16 +204,17 @@ module.exports = function (processingData, callback) {
               if (err) {
                 callback(customMessage(customErrorConfig().customError.EOPNOTSUPP));
               } else {
-                nodeModulePath=nodeModulePath.trim();
-                nodeModulePath=nodeModulePath.replace(/\\/g, "\\\\");
-                callback(null,nodeModulePath);
+                nodeModulePath = nodeModulePath.trim();
+                nodeModulePath = nodeModulePath.replace(/\\/g, '\\\\');
+                callback(null, nodeModulePath);
               }
             });
           },
           function (nodeModulePath, callback) {
             let remoteSetArray = JSON.parse(process.env.ypcontext);
             remoteSetArray = remoteSetArray.ypsettings;
-            fs.readFile(`${__dirname}${configs().getDelimiter()}..${configs().getDelimiter()}template${configs().getDelimiter()}logic_template.js`, 'UTF-8', (err, logicTemplateScript) => {
+            fs.readFile(`${__dirname}${configs().getDelimiter()}..${configs().getDelimiter()}template`
+              + `${configs().getDelimiter()}logic_template.js`, 'UTF-8', (err, logicTemplateScript) => {
               if (err) {
                 callback(err);
               } else {

@@ -1,4 +1,5 @@
 
+/* eslint no-console: "off" */
 const fs = require('fs');
 const isWsl = require('is-wsl');
 const nodeCmd = require('node-cmd');
@@ -8,7 +9,7 @@ const netrc = require('../utils/netrc');
 const { resolveOSCommands } = require('../utils/yp_resolve_os');
 
 function createYpConfig() {
-  let configPath = `${process.env.HOME}${configs().getDelimiter()}${configs().configBase}`;
+  const configPath = `${process.env.HOME}${configs().getDelimiter()}${configs().configBase}`;
   let settingsFilePath = '';
   const commandOptions = resolveOSCommands();
   const workspacePath = {

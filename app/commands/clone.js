@@ -408,7 +408,9 @@ module.exports = function (processingData, callback) {
       });
     },
     function (result, callback) {
-      const configFilePath = `${workspace}${configs().getDelimiter()}${normalize(apiHashDetails.apiDetails.apiName)}${configs().getDelimiter()}test${configs().getDelimiter()}runtime_config.json`;
+      const configFilePath = `${workspace}${configs().getDelimiter()}`
+      + `${normalize(apiHashDetails.apiDetails.apiName)}`
+      + `${configs().getDelimiter()}test${configs().getDelimiter()}runtime_config.json`;
       createRuntimeConfig(apiHashDetails, configFilePath, (err) => {
         if (err) {
           callback(err);

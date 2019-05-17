@@ -74,7 +74,7 @@ module.exports = function (processingData, callback) {
           if (err) {
             callback(err);
           } else {
-            workspacePath =  decodeURIComponent(JSON.parse(data).path);
+            workspacePath = decodeURIComponent(JSON.parse(data).path);
             pathEndPoint = `${workspacePath + normalize(processingData.apiName)}${configs().getDelimiter()}endpoints${configs().getDelimiter()}`;
             pathYpSetting = `${workspacePath}.ypsettings.json`;
             ui.log.write(chalk.green('✓ Execution starts....'));

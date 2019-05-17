@@ -1,6 +1,6 @@
 const fs = require('fs');
-const netrc = require('../utils/netrc');
 const isWsl = require('is-wsl');
+const netrc = require('../utils/netrc');
 
 exports.configs = function configs() {
   return {
@@ -32,7 +32,7 @@ exports.configs = function configs() {
       return '/';
     },
     getConfigSettings(callback) {
-      let settingsString = "";
+      let settingsString = '';
       if (process.platform == 'win32' || isWsl) {
         settingsString = '\\.yappes\\settings.json';
       } else {
