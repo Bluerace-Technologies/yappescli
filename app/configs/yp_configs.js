@@ -6,7 +6,7 @@ exports.configs = function configs() {
   return {
     getHostDetails() {
       let hostDetails = {};
-      if (process.env.YAPPES_ENV == 'development') {
+      if (process.env.YAPPES_ENV == 'developmen') {
         hostDetails = {
           host: 'localhost',
           port: 3001,
@@ -16,7 +16,7 @@ exports.configs = function configs() {
       } else {
         hostDetails = {
           host: 'cliapi.yappes.com',
-          port: 80,
+          port: '443',
           scheme: 'https',
           basePath: '/api',
         };
