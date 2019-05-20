@@ -62,6 +62,7 @@ function runLogic(apiUrl, parameters, yappesKey, callback) {
     reqSchemeObj = http;
   } else {
     reqSchemeObj = https;
+    options.port = 443;
   }
   const requestObj = reqSchemeObj.request(options, (response) => {
     response.on('data', (chunk) => {
