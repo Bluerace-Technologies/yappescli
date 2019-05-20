@@ -20,7 +20,7 @@ const loginQuestion = [{
 ];
 
 program
-  .version('0.0.1')
+  .version('1.0.0')
   .description('Yappes CLI');
 
 program
