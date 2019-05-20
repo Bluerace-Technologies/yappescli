@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Bluerace-Technologies/yappescli.git"
+    "url": "git+https://github.com/yappes-technologies/yappescli.git"
   },
   "keywords": [
     "cli"
@@ -30,9 +30,9 @@
   "author": "Yappes",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Bluerace-Technologies/yappescli/issues"
+    "url": "https://github.com/yappes-technologies/yappescli/issues"
   },
-  "homepage": "https://github.com/Bluerace-Technologies/yappescli#readme",
+  "homepage": "https://github.com/yappes-technologies/yappescli#readme",
   "dependencies": {
     "async": "^2.6.2",
     "chalk": "^2.4.2",
