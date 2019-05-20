@@ -15,9 +15,9 @@ exports.configs = function configs() {
         };
       } else {
         hostDetails = {
-          host: '192.168.1.7',
-          port: 3001,
-          scheme: 'http',
+          host: 'cliapi.yappes.com',
+          port: 80,
+          scheme: 'https',
           basePath: '/api',
         };
       }
