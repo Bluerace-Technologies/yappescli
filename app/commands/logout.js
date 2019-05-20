@@ -1,19 +1,54 @@
-const fs = require('fs');
-const netrc = require('netrc');
-const {configs} = require('../configs/yp_configs');
-let {resolveOSCommands} = require('../utils/yp_resolve_os');
+const inquirer = require('inquirer');
+const chalk = require('chalk');
+const netrc = require('../utils/netrc');
+const { configs } = require('../configs/yp_configs');
+const { customErrorConfig } = require('../configs/yp_custom_error');
+const { customMessage } = require('../utils/yp_normalize');
 
 
-module.exports = function(processingData, callback){
-    let fpath = configs().netrcPath;
-    let netrcObj = netrc();
-    let loginUser = "";
+module.exports = function (processingData, callback) {
+  const hostObj = configs().getHostDetails();
+  const netrcObj = netrc();
 
-    if(netrcObj.hasOwnProperty(configs().hostDetails.host)){
-    	delete netrcObj[configs().hostDetails.host];
-    	netrc.save(netrcObj);
-    	callback(null, "Logout done!!");
-    } else {
-    	callback("You are not logged in. Please login using the command 'yappescli login'");
-    }
-}
+  const clock = [
+    '⠋',
+    '⠙',
+    '⠹',
+    '⠸',
+    '⠼',
+    '⠴',
+    '⠦',
+    '⠧',
+    '⠇',
+    '⠏',
+  ];
+
+  let counter = 0;
+  const ui = new inquirer.ui.BottomBar();
+
+  const tickInterval = setInterval(() => {
+    ui.updateBottomBar(chalk.yellowBright(clock[counter++ % clock.length]));
+  }, 250);
+
+  ui.log.write(chalk.green('✓ Execution starts....'));
+
+  if (netrcObj.hasOwnProperty(hostObj.host)) {
+    delete netrcObj[hostObj.host];
+    netrc.save(netrcObj);
+    setTimeout(() => {
+      clearInterval(tickInterval);
+      ui.updateBottomBar('');
+      ui.updateBottomBar(chalk.green('✓ You are Logging out Please Wait. \n'));
+      ui.close();
+      callback(null, 'Logout done!!');
+    }, 1000);
+  } else {
+    setTimeout(() => {
+      clearInterval(tickInterval);
+      ui.updateBottomBar('');
+      ui.updateBottomBar(chalk.green('✓ Login Required. \n'));
+      ui.close();
+      callback(customMessage(customErrorConfig().customError.VALIDATION_ERROR_LOGIN));
+    }, 1000);
+  }
+};

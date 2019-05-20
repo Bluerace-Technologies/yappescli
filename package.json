@@ -2,11 +2,23 @@
   "name": "yappescli",
   "version": "1.0.0",
   "description": "CLI tool to handle Yappes APIs",
-  "main": "index.js",
+  "main": "app/index.js",
   "preferGlobal": true,
-  "bin": "./index.js",
+  "bin": {
+    "yappescli": "app/index.js"
+  },
   "scripts": {
+    "start": "node ./bin/run",
+    "postinstall": "node app/utils/create_workspace_path.js",
+    "test-lint": "eslint app",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "/app/**/*.js",
+    "/npm-shrinkwrap.json"
+  ],
+  "engines": {
+    "node": ">=8.0.0"
   },
   "repository": {
     "type": "git",
@@ -22,12 +34,43 @@
   },
   "homepage": "https://github.com/Bluerace-Technologies/yappescli#readme",
   "dependencies": {
+    "async": "^2.6.2",
+    "chalk": "^2.4.2",
     "commander": "^2.19.0",
+    "dotenv": "^6.2.0",
     "inquirer": "^6.2.1",
     "is-wsl": "^1.1.0",
+    "moment": "^2.24.0",
+    "mongodb": "^2.2.34",
+    "mysql": "^2.16.0",
+    "mysql2": "^1.5.2",
     "netrc": "^0.1.4",
+    "node-cmd": "^3.0.0",
     "opn": "^5.4.0",
     "path": "^0.12.7",
-    "request": "^2.88.0"
+    "qs": "^6.7.0",
+    "request": "^2.88.0",
+    "ssh2": "^0.8.2",
+    "tunnel-ssh": "^4.1.4",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^3.8.0"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-google": "^0.12.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-node": "^9.0.1",
+    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "husky": "^2.2.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "eslint app",
+      "pre-push": "eslint app"
+    }
   }
 }
